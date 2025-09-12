@@ -1,0 +1,221 @@
+# Copyright (C) 2025 AI Post Summary
+# This file is distributed under the same license as the AI Post Summary package.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI Post Summary 1.1.5\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ahm-ai-post-summary\n"
+"POT-Creation-Date: 2025-09-12 16:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2025-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: includes/admin-settings.php:98
+msgid "AI Post Summary Settings"
+msgstr ""
+
+#: includes/admin-settings.php:99
+msgid "AI Post Summary"
+msgstr ""
+
+#: includes/admin-settings.php:108
+msgid "Settings"
+msgstr ""
+
+#: includes/admin-settings.php:114
+msgid "API Provider"
+msgstr ""
+
+#: includes/admin-settings.php:121
+msgid "API Key (Gemini/ChatGPT)"
+msgstr ""
+
+#: includes/admin-settings.php:128
+msgid "Summary Character Count"
+msgstr ""
+
+#: includes/admin-settings.php:135
+msgid "Enable Globally"
+msgstr ""
+
+#: includes/admin-settings.php:142
+msgid "Disclaimer Text"
+msgstr ""
+
+#: includes/post-editor.php:223
+msgid "AI Post Summary"
+msgstr ""
+
+#: includes/frontend-display.php:44
+msgid "AI Summary"
+msgstr ""
+
+#: includes/admin-settings.php:40
+msgid "Saving..."
+msgstr ""
+
+#: includes/admin-settings.php:50
+msgid "Security check failed"
+msgstr ""
+
+#: includes/admin-settings.php:55
+msgid "No content provided for testing."
+msgstr ""
+
+#: includes/admin-settings.php:85
+msgid "✅ %s API key is valid and working correctly!"
+msgstr ""
+
+#: includes/admin-settings.php:90
+msgid "Please enter an API key to validate."
+msgstr ""
+
+#: includes/admin-settings.php:140
+msgid "Global summaries cannot be enabled without a valid API key. Please enter your API key first."
+msgstr ""
+
+#: includes/admin-settings.php:170
+msgid "✅ Settings saved successfully! Your AI Post Summary configuration has been updated."
+msgstr ""
+
+#: includes/admin-settings.php:260
+msgid "Default Language"
+msgstr ""
+
+#: includes/admin-settings.php:270
+msgid "Summary Display Theme"
+msgstr ""
+
+#: includes/admin-settings.php:480
+msgid "Save Settings"
+msgstr ""
+
+#: includes/post-editor.php:70
+msgid "Enable automatic summary generation for this post"
+msgstr ""
+
+#: includes/post-editor.php:75
+msgid "Note: Global summary is disabled. Enable it in Settings > AI Post Summary."
+msgstr ""
+
+#: includes/post-editor.php:85
+msgid "Generated Summary:"
+msgstr ""
+
+#: includes/post-editor.php:95
+msgid "Regenerate Summary"
+msgstr ""
+
+#: includes/post-editor.php:105
+msgid "Summary will be generated automatically when you publish the post (if enabled above)."
+msgstr ""
+
+#: includes/post-editor.php:110
+msgid "💡 Tip: Summary generation may take a few moments. If it doesn't appear automatically after saving, please refresh this page to see the generated summary."
+msgstr ""
+
+#: includes/post-editor.php:120
+msgid "Generating summary..."
+msgstr ""
+
+#: includes/post-editor.php:130
+msgid "💡 Tip: Summary is generated automatically when the post is published or updated."
+msgstr ""
+
+#: includes/post-editor.php:200
+msgid "Post summary regenerated successfully!"
+msgstr ""
+
+#: includes/post-editor.php:200
+msgid "Post summary generated successfully!"
+msgstr ""
+
+#: includes/post-editor.php:210
+msgid "AI Post Summary Error:"
+msgstr ""
+
+#: includes/post-editor.php:280
+msgid "Missing required parameters"
+msgstr ""
+
+#: includes/post-editor.php:290
+msgid "Security check failed"
+msgstr ""
+
+#: includes/post-editor.php:295
+msgid "Permission denied"
+msgstr ""
+
+#: includes/post-editor.php:310
+msgid "Post not found"
+msgstr ""
+
+#: includes/post-editor.php:320
+msgid "Failed to generate summary:"
+msgstr ""
+
+#: includes/post-editor.php:330
+msgid "Summary regenerated successfully!"
+msgstr ""
+
+#: includes/post-editor.php:335
+msgid "PHP Error:"
+msgstr ""
+
+#: includes/api-handler.php:30
+msgid "API key cannot be empty."
+msgstr ""
+
+#: includes/api-handler.php:35
+msgid "Invalid Gemini API key format. Please check your key."
+msgstr ""
+
+#: includes/api-handler.php:40
+msgid "Invalid OpenAI API key format. Keys should start with \"sk-\"."
+msgstr ""
+
+#: includes/api-handler.php:55
+msgid "Invalid API provider specified."
+msgstr ""
+
+#: includes/api-handler.php:65
+msgid "Unable to connect to Gemini API. Please check your internet connection."
+msgstr ""
+
+#: includes/api-handler.php:70
+msgid "Invalid Gemini API key. Please check your key and try again."
+msgstr ""
+
+#: includes/api-handler.php:75
+msgid "API key does not have permission to access Gemini API. Please check your API key permissions."
+msgstr ""
+
+#: includes/api-handler.php:95
+msgid "Unable to connect to Gemini API. Please check your API key and internet connection."
+msgstr ""
+
+#: includes/api-handler.php:110
+msgid "Unable to connect to OpenAI API. Please check your internet connection."
+msgstr ""
+
+#: includes/api-handler.php:115
+msgid "Invalid OpenAI API key. Please check your key and try again."
+msgstr ""
+
+#: includes/api-handler.php:120
+msgid "API key does not have permission to access OpenAI API. Please check your billing status."
+msgstr ""
+
+#: includes/api-handler.php:125
+msgid "API rate limit exceeded. Please try again later or check your usage limits."
+msgstr ""
+
+#: includes/api-handler.php:145
+msgid "OpenAI API error: %s"
+msgstr ""
+
+#: includes/api-handler.php:470
+msgid "API key not configured. Please set your API key in plugin settings."
+msgstr ""

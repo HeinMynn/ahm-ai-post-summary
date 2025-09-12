@@ -1,0 +1,14 @@
+changelog.md
+/node_modules
+.DS_Store
+.env
+.vscode
+.env.local
+.env.*.local
+.env.example
+.env.test
+dist/README.md
+dist/**/*.map
+dist/**/*.d.ts
+assets/README.md
+assets/**/*.psd

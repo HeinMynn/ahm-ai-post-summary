@@ -1,0 +1,29 @@
+{
+  "name": "ahm-ai-post-summary",
+  "version": "1.1.4",
+  "description": "WordPress plugin to generate AI-powered summaries for blog posts",
+  "main": "ahm-ai-post-summary.php",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "echo Building CSS files...",
+    "build": "npm run build:css",
+    "watch": "echo Watching for changes... (manual rebuild required)"
+  },
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "ai",
+    "summary",
+    "gemini",
+    "chatgpt",
+    "seo",
+    "post-summary",
+    "openai"
+  ],
+  "author": "Aung Hein Mynn",
+  "license": "GPL-2.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aungheinmynn/ai-post-summary"
+  }
+}
