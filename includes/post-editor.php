@@ -30,7 +30,10 @@ function ahmaipsu_meta_box_callback($post) {
     <div class="gpt-summary-meta-box">
         <label>
             <input type="checkbox" name="ahmaipsu_enabled" value="1" <?php checked($enabled); ?> />
-            <?php printf(esc_html__('Enable automatic summary generation for this %s', 'ahm-ai-post-summary'), esc_html(strtolower($post_type_label))); ?>
+            <?php
+            /* translators: %s: Post type name (e.g., "post", "page") */
+            printf(esc_html__('Enable automatic summary generation for this %s', 'ahm-ai-post-summary'), esc_html(strtolower($post_type_label)));
+            ?>
         </label>
         
         <?php if (!$global_enabled): ?>
