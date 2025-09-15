@@ -190,6 +190,28 @@ function ahmaipsu_sanitize_settings($input) {
         }
     }
     
+    // Sanitize supported post types
+    if (isset($input['ahmaipsu_post_types']) && is_array($input['ahmaipsu_post_types'])) {
+        $allowed_post_types = ['post', 'page'];
+        $sanitized_post_types = array();
+        
+        foreach ($input['ahmaipsu_post_types'] as $post_type) {
+            if (in_array($post_type, $allowed_post_types)) {
+                $sanitized_post_types[] = $post_type;
+            }
+        }
+        
+        // Ensure at least one post type is selected
+        if (empty($sanitized_post_types)) {
+            $sanitized_post_types = ['post']; // Default to post if none selected
+        }
+        
+        $sanitized['ahmaipsu_post_types'] = $sanitized_post_types;
+    } else {
+        // Default to post if not set
+        $sanitized['ahmaipsu_post_types'] = ['post'];
+    }
+    
     // Add success message if settings were saved successfully
     if (!empty($sanitized)) {
         add_settings_error(
@@ -245,6 +267,14 @@ function ahmaipsu_settings_init() {
         'ahmaipsu_global_enable',
         __('Enable Globally', 'ahm-ai-post-summary'),
         'ahmaipsu_global_enable_render',
+        'ahmaipsu',
+        'ahmaipsu_section'
+    );
+
+    add_settings_field(
+        'ahmaipsu_post_types',
+        __('Supported Post Types', 'ahm-ai-post-summary'),
+        'ahmaipsu_post_types_render',
         'ahmaipsu',
         'ahmaipsu_section'
     );
@@ -353,6 +383,42 @@ function ahmaipsu_global_enable_render() {
     } else {
         echo '<p class="description">When enabled, AI summaries will be automatically generated for all new posts (individual posts can still opt out).</p>';
     }
+}
+
+function ahmaipsu_post_types_render() {
+    $options = get_option('ahmaipsu_settings');
+    $selected_post_types = isset($options['ahmaipsu_post_types']) ? $options['ahmaipsu_post_types'] : ['post'];
+    
+    $post_types = [
+        'post' => __('Posts', 'ahm-ai-post-summary'),
+        'page' => __('Pages', 'ahm-ai-post-summary')
+    ];
+    
+    echo '<fieldset>';
+    echo '<legend class="screen-reader-text">' . esc_html__('Supported Post Types', 'ahm-ai-post-summary') . '</legend>';
+    
+    foreach ($post_types as $post_type => $label) {
+        $checked = in_array($post_type, $selected_post_types) ? 'checked' : '';
+        echo '<label style="display: block; margin-bottom: 8px;">';
+        echo '<input type="checkbox" name="ahmaipsu_settings[ahmaipsu_post_types][]" value="' . esc_attr($post_type) . '" ' . esc_attr($checked) . ' class="ahmaipsu-post-type-checkbox" />';
+        echo ' ' . esc_html($label);
+        echo '</label>';
+    }
+    
+    echo '</fieldset>';
+    echo '<p class="description">Select which post types should support AI summary generation. At least one post type must be selected.</p>';
+    
+    // Add JavaScript to ensure at least one checkbox is always selected
+    echo '<script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $(".ahmaipsu-post-type-checkbox").on("change", function() {
+                var checkedBoxes = $(".ahmaipsu-post-type-checkbox:checked");
+                if (checkedBoxes.length === 0) {
+                    $(this).prop("checked", true);
+                }
+            });
+        });
+    </script>';
 }
 
 function ahmaipsu_default_language_render() {

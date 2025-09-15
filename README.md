@@ -46,7 +46,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/aungheinmynn/ahm-ai-post-summary.git
+git clone https://github.com/HeinMynn/ahm-ai-post-summary.git
 
 # Upload to your WordPress plugins directory
 cp -r ai-post-summary /wp-content/plugins/
@@ -176,8 +176,8 @@ This project is licensed under the GPL v2 or later - see the [LICENSE](LICENSE) 
 ## 📞 Support
 
 - **WordPress.org**: [Support Forum](https://wordpress.org/support/plugin/ahm-ai-post-summary/)
-- **GitHub Issues**: [Report Bugs](https://github.com/aungheinmynn/ahm-ai-post-summary/issues)
-- **Documentation**: [Plugin Docs](https://github.com/aungheinmynn/ahm-ai-post-summary/wiki)
+- **GitHub Issues**: [Report Bugs](https://github.com/HeinMynn/ahm-ai-post-summary/issues)
+- **Documentation**: [Plugin Docs](https://github.com/HeinMynn/ahm-ai-post-summary/wiki)
 
 ---
 

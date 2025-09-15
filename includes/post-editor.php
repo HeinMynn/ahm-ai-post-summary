@@ -16,17 +16,21 @@ function ahmaipsu_meta_box_callback($post) {
     $summary = get_post_meta($post->ID, '_ahmaipsu_content', true);
     $global_enabled = get_option('ahmaipsu_settings')['ahmaipsu_global_enable'] ?? false;
     
-    // For new posts (no existing meta), default to global setting
+    // For new posts/pages (no existing meta), default to global setting
     if ($enabled === '' && $global_enabled) {
         $enabled = '1';
     }
+    
+    // Get post type label for display
+    $post_type_object = get_post_type_object($post->post_type);
+    $post_type_label = $post_type_object ? $post_type_object->labels->singular_name : ucfirst($post->post_type);
     
     wp_nonce_field('ahmaipsu_meta', 'ahmaipsu_nonce');
     ?>
     <div class="gpt-summary-meta-box">
         <label>
             <input type="checkbox" name="ahmaipsu_enabled" value="1" <?php checked($enabled); ?> />
-            Enable automatic summary generation for this post
+            <?php printf(esc_html__('Enable automatic summary generation for this %s', 'ahm-ai-post-summary'), esc_html(strtolower($post_type_label))); ?>
         </label>
         
         <?php if (!$global_enabled): ?>
@@ -88,7 +92,20 @@ add_action('wp_ajax_ahmaipsu_check_update', 'ahmaipsu_ajax_check_update');
 add_action('admin_enqueue_scripts', 'ahmaipsu_enqueue_admin_scripts');
 
 function ahmaipsu_enqueue_admin_scripts($hook) {
-    if ('post.php' !== $hook && 'post-new.php' !== $hook) {
+    // Get supported post types from settings
+    $options = get_option('ahmaipsu_settings');
+    $supported_post_types = isset($options['ahmaipsu_post_types']) ? $options['ahmaipsu_post_types'] : ['post'];
+    
+    // Check if current screen is for a supported post type
+    $is_supported_screen = false;
+    foreach ($supported_post_types as $post_type) {
+        if ($hook === $post_type . '.php' || $hook === $post_type . '-new.php') {
+            $is_supported_screen = true;
+            break;
+        }
+    }
+    
+    if (!$is_supported_screen) {
         return;
     }
     
@@ -124,13 +141,18 @@ function ahmaipsu_enqueue_admin_scripts($hook) {
 }
 
 function ahmaipsu_add_meta_box() {
-    add_meta_box(
-        'ahmaipsu_meta',
-        __('AI Post Summary', 'ahm-ai-post-summary'),
-        'ahmaipsu_meta_box_callback',
-        'post',
-        'side'
-    );
+    $options = get_option('ahmaipsu_settings');
+    $supported_post_types = isset($options['ahmaipsu_post_types']) ? $options['ahmaipsu_post_types'] : ['post'];
+    
+    foreach ($supported_post_types as $post_type) {
+        add_meta_box(
+            'ahmaipsu_meta',
+            __('AI Post Summary', 'ahm-ai-post-summary'),
+            'ahmaipsu_meta_box_callback',
+            $post_type,
+            'side'
+        );
+    }
 }
 function ahmaipsu_save_post_meta($post_id) {
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
@@ -159,6 +181,17 @@ function ahmaipsu_auto_generate($post_id) {
     static $processed = array();
     if (isset($processed[$post_id])) return;
     $processed[$post_id] = true;
+    
+    // Check if this post type is supported
+    $post = get_post($post_id);
+    if (!$post) return;
+    
+    $options = get_option('ahmaipsu_settings');
+    $supported_post_types = isset($options['ahmaipsu_post_types']) ? $options['ahmaipsu_post_types'] : ['post'];
+    
+    if (!in_array($post->post_type, $supported_post_types)) {
+        return; // Post type not supported
+    }
     
     // Check if summary is enabled for this specific post
     $post_enabled = get_post_meta($post_id, '_ahmaipsu_enabled', true);

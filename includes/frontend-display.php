@@ -14,8 +14,8 @@ if (!defined('ABSPATH')) {
 add_filter('the_content', 'ahmaipsu_display_summary');
 
 function ahmaipsu_display_summary($content) {
-    // Only show on single posts and main query
-    if (!is_single() || !is_main_query() || is_admin()) {
+    // Only show on single posts/pages and main query
+    if (!is_singular() || !is_main_query() || is_admin()) {
         return $content;
     }
     
@@ -28,6 +28,12 @@ function ahmaipsu_display_summary($content) {
     
     $options = get_option('ahmaipsu_settings', array());
     $global_enabled = isset($options['ahmaipsu_global_enable']) ? $options['ahmaipsu_global_enable'] : false;
+    $supported_post_types = isset($options['ahmaipsu_post_types']) ? $options['ahmaipsu_post_types'] : ['post'];
+    
+    // Check if current post type is supported
+    if (!in_array($post->post_type, $supported_post_types)) {
+        return $content;
+    }
     $post_enabled = get_post_meta($post->ID, '_ahmaipsu_enabled', true);
     $summary = get_post_meta($post->ID, '_ahmaipsu_content', true);
     
@@ -80,8 +86,21 @@ function ahmaipsu_render_summary($summary, $disclaimer, $theme = 'classic') {
 add_action('wp_enqueue_scripts', 'ahmaipsu_frontend_styles');
 
 function ahmaipsu_frontend_styles() {
-    // Only enqueue on single posts where we might show summaries
-    if (!is_single()) {
+    // Only enqueue on single posts/pages where we might show summaries
+    if (!is_singular()) {
+        return;
+    }
+    
+    global $post;
+    if (!$post) {
+        return;
+    }
+    
+    // Check if current post type is supported
+    $options = get_option('ahmaipsu_settings', array());
+    $supported_post_types = isset($options['ahmaipsu_post_types']) ? $options['ahmaipsu_post_types'] : ['post'];
+    
+    if (!in_array($post->post_type, $supported_post_types)) {
         return;
     }
     
