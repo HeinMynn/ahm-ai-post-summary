@@ -771,3 +771,38 @@
     background: #f0f8f0;
   }
 }
+
+/* Tab functionality styles - High specificity to override WordPress defaults */
+.wrap form#ahmaipsu-settings-form div.tab-content,
+.wrap #ahmaipsu-settings-form div.tab-content,
+#ahmaipsu-settings-form div.tab-content,
+.ahmaipsu-settings-form div.tab-content,
+form#ahmaipsu-settings-form div.tab-content,
+div#ahmaipsu-settings-form div.tab-content {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+.wrap form#ahmaipsu-settings-form div.tab-content.active,
+.wrap #ahmaipsu-settings-form div.tab-content.active,
+#ahmaipsu-settings-form div.tab-content.active,
+.ahmaipsu-settings-form div.tab-content.active,
+form#ahmaipsu-settings-form div.tab-content.active,
+div#ahmaipsu-settings-form div.tab-content.active {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.nav-tab-wrapper .nav-tab.nav-tab-active,
+.nav-tab-wrapper a.nav-tab-active {
+  background: #fff !important;
+  border-bottom: 1px solid #fff !important;
+  color: #2271b1 !important;
+  border-color: #ccc #ccc #fff !important;
+}

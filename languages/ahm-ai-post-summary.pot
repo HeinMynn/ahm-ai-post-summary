@@ -85,7 +85,7 @@ msgid "Default Language"
 msgstr ""
 
 #: includes/admin-settings.php:270
-msgid "Summary Display Theme"
+msgid "Choose Theme"
 msgstr ""
 
 #: includes/admin-settings.php:480

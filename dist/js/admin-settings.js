@@ -8,8 +8,28 @@
 
   // Wait for DOM to be ready
   $(document).ready(function () {
+    // Initialize tab visibility on page load - hide inactive tabs
+    $(".tab-content:not(.active)").hide();
+
+    // Tab switching functionality
+    $(".nav-tab").on("click", function (e) {
+      e.preventDefault();
+
+      // Remove active class from all tabs
+      $(".nav-tab").removeClass("nav-tab-active");
+      $(".tab-content").removeClass("active").hide();
+
+      // Add active class to clicked tab
+      $(this).addClass("nav-tab-active");
+
+      // Show corresponding tab content
+      var tabId = $(this).data("tab");
+      var $targetTab = $("#" + tabId + "-tab");
+      $targetTab.addClass("active").show();
+    });
+
     // Handle API provider change
-    $("#ahmaipsu_api_provider").change(function () {
+    $("#ahmaipsu_api_provider").on("change", function () {
       var provider = $(this).val();
       if (provider === "gemini") {
         $("#gemini-instructions").show();
@@ -37,7 +57,7 @@
     updateValidationButtonVisibility();
 
     // Handle test summary generation
-    $("#generate_test_summary").click(function () {
+    $("#generate_test_summary").on("click", function () {
       var content = $("#test_content").val();
       if (!content) return;
 
@@ -109,42 +129,36 @@
 
   // Theme Selection Functionality
   function initializeThemeSelector() {
-    // Handle theme radio button changes
-    $('input[name="ahmaipsu_settings[ahmaipsu_theme]"]').change(function () {
-      var selectedTheme = $(this).val();
-      updateThemeSelection(selectedTheme);
-    });
-
-    // Initialize with current selection
-    var currentTheme = $(
-      'input[name="ahmaipsu_settings[ahmaipsu_theme]"]:checked'
-    ).val();
+    // Initialize with current selection from hidden input
+    var currentTheme = $("#ahmaipsu_selected_theme").val();
     if (currentTheme) {
       updateThemeSelection(currentTheme);
     }
 
     // Add click handlers for theme option containers
-    $(".ahmaipsu-theme-option").click(function (e) {
-      // Don't trigger if clicking on the radio button itself
-      if (e.target.type !== "radio" && !$(e.target).is("label")) {
-        var radio = $(this).find('input[type="radio"]');
-        if (!radio.is(":checked")) {
-          radio.prop("checked", true).trigger("change");
-        }
+    $(".ahmaipsu-theme-option").on("click", function (e) {
+      var selectedTheme = $(this).data("theme");
+      var currentSelected = $("#ahmaipsu_selected_theme").val();
+
+      // Only update if different theme is selected
+      if (selectedTheme !== currentSelected) {
+        $("#ahmaipsu_selected_theme").val(selectedTheme);
+        updateThemeSelection(selectedTheme);
       }
     });
 
     // Add hover effects (optional - CSS handles most of this now)
-    $(".ahmaipsu-theme-option").hover(
-      function () {
-        if (!$(this).find('input[type="radio"]').is(":checked")) {
+    $(".ahmaipsu-theme-option")
+      .on("mouseenter", function () {
+        var selectedTheme = $(this).data("theme");
+        var currentSelected = $("#ahmaipsu_selected_theme").val();
+        if (selectedTheme !== currentSelected) {
           $(this).addClass("ahmaipsu-theme-hover");
         }
-      },
-      function () {
+      })
+      .on("mouseleave", function () {
         $(this).removeClass("ahmaipsu-theme-hover");
-      }
-    );
+      });
   }
 
   function updateThemeSelection(selectedTheme) {
@@ -194,7 +208,7 @@
     );
 
     // Insert message after theme selector
-    $(".ahmaipsu-theme-selector").after(message);
+    $(".ahmaipsu-theme-selector").before(message);
 
     // Auto-hide after 4 seconds
     setTimeout(function () {

@@ -50,6 +50,56 @@ function ahmaipsu_admin_scripts($hook) {
         'validate_nonce' => wp_create_nonce('ahmaipsu_test'), // Use same nonce for simplicity
         'saving_text' => __('Saving...', 'ahm-ai-post-summary'),
     ));
+    
+    // Add inline script for admin functionality
+    $admin_js = "
+        jQuery(document).ready(function($) {
+            // Ensure at least one post type checkbox is selected
+            $('.ahmaipsu-post-type-checkbox').on('change', function() {
+                var checkedBoxes = $('.ahmaipsu-post-type-checkbox:checked');
+                if (checkedBoxes.length === 0) {
+                    $(this).prop('checked', true);
+                }
+            });
+            
+            // Test summary generation
+            $('#generate_test_summary').on('click', function() {
+                var content = $('#test_content').val();
+                var nonce = $('#test_nonce').val();
+                
+                if (!content.trim()) {
+                    $('#test_result').html('<div class=\"notice notice-error\"><p>Please enter some content to test.</p></div>');
+                    return;
+                }
+                
+                $(this).prop('disabled', true).text('Generating...');
+                
+                $.ajax({
+                    url: ahmaipsu_admin_vars.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'ahmaipsu_test',
+                        content: content,
+                        nonce: nonce
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#test_result').html('<div class=\"notice notice-success\"><p><strong>Test Summary:</strong></p><p>' + response.data + '</p></div>');
+                        } else {
+                            $('#test_result').html('<div class=\"notice notice-error\"><p>' + response.data + '</p></div>');
+                        }
+                    },
+                    error: function() {
+                        $('#test_result').html('<div class=\"notice notice-error\"><p>An error occurred while generating the summary.</p></div>');
+                    },
+                    complete: function() {
+                        $('#generate_test_summary').prop('disabled', false).text('Generate Test Summary');
+                    }
+                });
+            });
+        });
+    ";
+    wp_add_inline_script('ahmaipsu-admin-settings', $admin_js);
 }
 
 function ahmaipsu_ajax_test() {
@@ -232,9 +282,10 @@ function ahmaipsu_settings_init() {
         'show_in_rest' => false
     ));
 
+    // API Settings Section
     add_settings_section(
-        'ahmaipsu_section',
-        __('Settings', 'ahm-ai-post-summary'),
+        'ahmaipsu_api_section',
+        __('API Configuration', 'ahm-ai-post-summary'),
         null,
         'ahmaipsu'
     );
@@ -244,7 +295,7 @@ function ahmaipsu_settings_init() {
         __('API Provider', 'ahm-ai-post-summary'),
         'ahmaipsu_api_provider_render',
         'ahmaipsu',
-        'ahmaipsu_section'
+        'ahmaipsu_api_section'
     );
 
     add_settings_field(
@@ -252,7 +303,15 @@ function ahmaipsu_settings_init() {
         __('API Key (Gemini/ChatGPT)', 'ahm-ai-post-summary'),
         'ahmaipsu_api_key_render',
         'ahmaipsu',
-        'ahmaipsu_section'
+        'ahmaipsu_api_section'
+    );
+
+    // Summary Settings Section
+    add_settings_section(
+        'ahmaipsu_summary_section',
+        __('Summary Configuration', 'ahm-ai-post-summary'),
+        null,
+        'ahmaipsu'
     );
 
     add_settings_field(
@@ -260,7 +319,7 @@ function ahmaipsu_settings_init() {
         __('Summary Character Count', 'ahm-ai-post-summary'),
         'ahmaipsu_char_count_render',
         'ahmaipsu',
-        'ahmaipsu_section'
+        'ahmaipsu_summary_section'
     );
 
     add_settings_field(
@@ -268,7 +327,7 @@ function ahmaipsu_settings_init() {
         __('Enable Globally', 'ahm-ai-post-summary'),
         'ahmaipsu_global_enable_render',
         'ahmaipsu',
-        'ahmaipsu_section'
+        'ahmaipsu_summary_section'
     );
 
     add_settings_field(
@@ -276,7 +335,7 @@ function ahmaipsu_settings_init() {
         __('Supported Post Types', 'ahm-ai-post-summary'),
         'ahmaipsu_post_types_render',
         'ahmaipsu',
-        'ahmaipsu_section'
+        'ahmaipsu_summary_section'
     );
 
     add_settings_field(
@@ -284,7 +343,15 @@ function ahmaipsu_settings_init() {
         __('Default Language', 'ahm-ai-post-summary'),
         'ahmaipsu_default_language_render',
         'ahmaipsu',
-        'ahmaipsu_section'
+        'ahmaipsu_summary_section'
+    );
+
+    // Display Settings Section
+    add_settings_section(
+        'ahmaipsu_display_section',
+        __('Display Configuration', 'ahm-ai-post-summary'),
+        null,
+        'ahmaipsu'
     );
 
     add_settings_field(
@@ -292,26 +359,28 @@ function ahmaipsu_settings_init() {
         __('Disclaimer Text', 'ahm-ai-post-summary'),
         'ahmaipsu_disclaimer_render',
         'ahmaipsu',
-        'ahmaipsu_section'
+        'ahmaipsu_display_section'
     );
 
     add_settings_field(
         'ahmaipsu_theme',
-        __('Summary Display Theme', 'ahm-ai-post-summary'),
+        __('Choose Theme', 'ahm-ai-post-summary'),
         'ahmaipsu_theme_render',
         'ahmaipsu',
-        'ahmaipsu_section'
+        'ahmaipsu_display_section'
     );
 }
 
 function ahmaipsu_api_provider_render() {
-    $options = get_option('ahmaipsu_settings');
-    $provider = $options['ahmaipsu_api_provider'] ?? 'gemini';
-    echo '<select name="ahmaipsu_settings[ahmaipsu_api_provider]" id="ahmaipsu_api_provider">';
-    echo '<option value="gemini" ' . selected($provider, 'gemini', false) . '>Gemini 2.0 Flash</option>';
-    echo '<option value="chatgpt" ' . selected($provider, 'chatgpt', false) . '>ChatGPT</option>';
-    echo '</select>';
-    echo '<p class="description">Choose your preferred AI service. Gemini is recommended for better performance and lower costs.</p>';
+    $options = get_option('ahmaipsu_settings', array());
+    $provider = isset($options['ahmaipsu_api_provider']) ? $options['ahmaipsu_api_provider'] : 'gemini';
+    ?>
+    <select name="ahmaipsu_settings[ahmaipsu_api_provider]" id="ahmaipsu_api_provider">
+        <option value="gemini" <?php selected($provider, 'gemini'); ?>>Gemini 2.0 Flash</option>
+        <option value="chatgpt" <?php selected($provider, 'chatgpt'); ?>>ChatGPT</option>
+    </select>
+    <p class="description">Choose your preferred AI service. Gemini is recommended for better performance and lower costs.</p>
+    <?php
 }
 
 function ahmaipsu_api_key_render() {
@@ -368,6 +437,11 @@ function ahmaipsu_global_enable_render() {
     $is_enabled = !empty($options['ahmaipsu_global_enable']);
     $has_api_key = !empty(trim($api_key));
     
+    // Auto-enable if API key is present and no explicit choice has been made
+    if ($has_api_key && !isset($options['ahmaipsu_global_enable'])) {
+        $is_enabled = true;
+    }
+    
     $checked = $is_enabled ? 'checked' : '';
     $disabled = !$has_api_key ? 'disabled' : '';
     
@@ -376,7 +450,7 @@ function ahmaipsu_global_enable_render() {
     
     if (!$has_api_key) {
         echo '<div class="notice notice-warning inline ahmaipsu-warning-notice">';
-        echo '<p><strong>⚠️ Warning:</strong> You must enter a valid API key above before enabling global summaries. ';
+        echo '<p><strong>⚠️ Warning:</strong> You must enter a valid API key <a href="#api-tab" onclick="jQuery(\'.nav-tab[data-tab=\\\'api\\\']\').click(); return false;">here</a> before enabling global summaries. ';
         echo 'The checkbox will be enabled automatically once you save an API key.</p>';
         echo '</div>';
         
@@ -407,18 +481,6 @@ function ahmaipsu_post_types_render() {
     
     echo '</fieldset>';
     echo '<p class="description">Select which post types should support AI summary generation. At least one post type must be selected.</p>';
-    
-    // Add JavaScript to ensure at least one checkbox is always selected
-    echo '<script type="text/javascript">
-        jQuery(document).ready(function($) {
-            $(".ahmaipsu-post-type-checkbox").on("change", function() {
-                var checkedBoxes = $(".ahmaipsu-post-type-checkbox:checked");
-                if (checkedBoxes.length === 0) {
-                    $(this).prop("checked", true);
-                }
-            });
-        });
-    </script>';
 }
 
 function ahmaipsu_default_language_render() {
@@ -504,15 +566,14 @@ function ahmaipsu_theme_render() {
     echo '<div class="ahmaipsu-theme-selector">';
     echo '<p class="description">🎨 Choose how you want your AI summaries to appear on your site. Click on any theme below to select it and see a live preview.</p>';
     
+    // Hidden input to store selected theme
+    echo '<input type="hidden" name="ahmaipsu_settings[ahmaipsu_theme]" value="' . esc_attr($selected_theme) . '" id="ahmaipsu_selected_theme" />';
+    
     foreach ($themes as $theme_key => $theme_data) {
         echo '<div class="ahmaipsu-theme-option' . (($selected_theme === $theme_key) ? ' selected' : '') . '" data-theme="' . esc_attr($theme_key) . '">';
         
-        echo '<div class="ahmaipsu-theme-radio">';
-        echo '<input type="radio" name="ahmaipsu_settings[ahmaipsu_theme]" value="' . esc_attr($theme_key) . '" ' . checked($selected_theme, $theme_key, false) . ' id="theme_' . esc_attr($theme_key) . '" />';
-        echo '</div>';
-        
         echo '<div class="ahmaipsu-theme-info">';
-        echo '<label for="theme_' . esc_attr($theme_key) . '" class="ahmaipsu-theme-name">' . esc_html($theme_data['name']) . '</label>';
+        echo '<div class="ahmaipsu-theme-name">' . esc_html($theme_data['name']) . '</div>';
         echo '<p class="ahmaipsu-theme-description">' . esc_html($theme_data['description']) . '</p>';
         echo '</div>';
         
@@ -538,19 +599,81 @@ function ahmaipsu_options_page() {
         <?php
         // Display settings errors/messages
         settings_errors('ahmaipsu_settings');
+        
+        // Get current options for tab logic
+        $options = get_option('ahmaipsu_settings', array());
+        $has_api_key = !empty(trim($options['ahmaipsu_api_key'] ?? ''));
+        $default_tab = $has_api_key ? 'summary' : 'api';
         ?>
         
         <form action="options.php" method="post" id="ahmaipsu-settings-form">
             <?php
             settings_fields('ahmaipsu');
-            do_settings_sections('ahmaipsu');
-            submit_button(__('Save Settings', 'ahm-ai-post-summary'), 'primary', 'submit', true, array('id' => 'ahmaipsu-save-button'));
             ?>
+            
+            <!-- Tab Navigation -->
+            <div class="nav-tab-wrapper">
+                <a href="#summary-tab" class="nav-tab <?php echo $default_tab === 'summary' ? 'nav-tab-active' : ''; ?>" data-tab="summary">📝 Summary</a>
+                <a href="#display-tab" class="nav-tab <?php echo $default_tab === 'display' ? 'nav-tab-active' : ''; ?>" data-tab="display">🎨 Themes</a>
+                <a href="#api-tab" class="nav-tab <?php echo $default_tab === 'api' ? 'nav-tab-active' : ''; ?>" data-tab="api">🔑 API Key</a>
+            </div>
+            
+            <div id="summary-tab" class="tab-content <?php echo $default_tab === 'summary' ? 'active' : ''; ?>">
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Summary Character Count', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_char_count_render(); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Enable Globally', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_global_enable_render(); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Supported Post Types', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_post_types_render(); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Default Language', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_default_language_render(); ?></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Display Tab Content -->
+            <div id="display-tab" class="tab-content <?php echo $default_tab === 'display' ? 'active' : ''; ?>">
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Disclaimer Text', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_disclaimer_render(); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Choose Theme', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_theme_render(); ?></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- API Tab Content -->
+            <div id="api-tab" class="tab-content <?php echo $default_tab === 'api' ? 'active' : ''; ?>">
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><?php esc_html_e('API Provider', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_api_provider_render(); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('API Key (Gemini/ChatGPT)', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_api_key_render(); ?></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <?php submit_button(__('Save Settings', 'ahm-ai-post-summary'), 'primary', 'submit', true, array('id' => 'ahmaipsu-save-button')); ?>
         </form>
         
         <div class="ahmaipsu-test-container">
             <h3>Generate Summary Test</h3>
             <textarea id="test_content" rows="4" cols="60" placeholder="Enter content to test summary generation..."></textarea><br><br>
+            <?php wp_nonce_field('ahmaipsu_test', 'test_nonce'); ?>
             <button type="button" id="generate_test_summary" class="button button-secondary">Generate Test Summary</button>
             <div id="test_result" class="ahmaipsu-test-result"></div>
         </div>
