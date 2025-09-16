@@ -3,7 +3,7 @@
  * Plugin Name:       AI Post Summary
  * Plugin URI:        https://wordpress.org/plugins/ahm-ai-post-summary/
  * Description:       Automatically generates AI-powered summaries for your blog posts using Google Gemini or OpenAI ChatGPT. Display summaries at the top of posts to improve reader engagement and SEO.
- * Version: 1.1.5
+ * Version: 1.1.6
  * Requires at least: 5.0
  * Requires PHP:      7.4
  * Author:            Aung Hein Mynn
@@ -38,7 +38,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('AHMAIPSU_VERSION', '1.1.5');
+define('AHMAIPSU_VERSION', '1.1.6');
 define('AHMAIPSU_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AHMAIPSU_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('AHMAIPSU_PLUGIN_FILE', __FILE__);

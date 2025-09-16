@@ -1,6 +1,6 @@
 /**
  * Admin Settings JavaScript for AHM AI Post Summary
- * Version: 1.1.5
+ * Version: 1.1.6
  */
 
 (function ($) {
