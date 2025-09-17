@@ -1,6 +1,6 @@
 {
   "name": "ahm-ai-post-summary",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "WordPress plugin to generate AI-powered summaries for blog posts",
   "main": "ahm-ai-post-summary.php",
   "scripts": {

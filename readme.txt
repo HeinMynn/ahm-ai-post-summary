@@ -4,7 +4,7 @@ Tags: ai, summary, seo, automation, content
 Requires at least: 5.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -268,11 +268,6 @@ You can set your preferred character count in the settings. The default is 200 c
 * Real-time backend updates
 * Comprehensive admin interface
 * Security and performance optimizations
-
-== Upgrade Notice ==
-
-= 1.1.5 =
-Major improvements! New API key validation, instant summary regeneration, enhanced error handling, and better API reliability. Highly recommended update for all users.
 
 = 1.0.0 =
 Initial release of AI Post Summary. Install now to start generating AI-powered summaries for your content!

@@ -80,7 +80,7 @@ function ahmaipsu_meta_box_callback($post) {
         </div>
         
         <div class="ahmaipsu-summary-footer">
-            💡 <strong>Tip:</strong> Summary is generated automatically when the post is published or updated.
+            💡 <strong>Tip:</strong> Summary is generated automatically when the post is published.
         </div>
     </div>
     <?php
@@ -125,7 +125,7 @@ function ahmaipsu_enqueue_admin_scripts($hook) {
     // Enqueue our post editor JavaScript
     wp_enqueue_script(
         'ahmaipsu-post-editor',
-        AHMAIPSU_PLUGIN_URL . 'dist/js/post-editor.js',
+        AHMAIPSU_PLUGIN_URL . 'dist/js/post-editor.min.js',
         array('jquery'),
         AHMAIPSU_VERSION,
         true

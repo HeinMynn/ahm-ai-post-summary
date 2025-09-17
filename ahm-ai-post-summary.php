@@ -27,7 +27,7 @@
  * along with AI Post Summary. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
  *
  * @package AIPostSummary
- * @version 1.1.5
+ * @version 1.1.6
  * @author  Aung Hein Mynn
  * @license GPL-2.0-or-later
  */

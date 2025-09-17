@@ -517,8 +517,9 @@ class ahmaipsu_API_Handler {
         $language_instruction = self::detect_language_instruction($content);
 
         $prompt = $language_instruction . "\n\n" .
-                 "Please provide a concise summary of the following content in exactly " . $char_count . " characters or less. " .
+                 "Please provide a concise summary of the following content in " . $char_count . " characters or less. " .
                  "Focus on the main points and key information. Make it engaging and readable.\n\n" .
+                 "Make sure to be a full sentence and not cut off in the middle.\n\n" .
                  "Content to summarize:\n" . $content;
 
         $body = array(
@@ -580,13 +581,13 @@ class ahmaipsu_API_Handler {
 
             $summary = trim($data['candidates'][0]['content']['parts'][0]['text']);
 
-            // Ensure the summary doesn't exceed the character limit
-            if (strlen($summary) > $char_count) {
-                $summary = substr($summary, 0, $char_count);
-                // Try to cut at a word boundary
-                $last_space = strrpos($summary, ' ');
+            // Ensure the summary doesn't exceed the character limit (use multi-byte functions for non-English support)
+            if (mb_strlen($summary, 'UTF-8') > $char_count) {
+                $summary = mb_substr($summary, 0, $char_count, 'UTF-8');
+                // Try to cut at a word boundary (multi-byte safe)
+                $last_space = mb_strrpos($summary, ' ', 0, 'UTF-8');
                 if ($last_space !== false) {
-                    $summary = substr($summary, 0, $last_space);
+                    $summary = mb_substr($summary, 0, $last_space, 'UTF-8');
                 }
             }
 
@@ -650,13 +651,13 @@ class ahmaipsu_API_Handler {
         if (isset($data['choices'][0]['message']['content'])) {
             $summary = trim($data['choices'][0]['message']['content']);
 
-            // Ensure the summary doesn't exceed the character limit
-            if (strlen($summary) > $char_count) {
-                $summary = substr($summary, 0, $char_count);
-                // Try to cut at a word boundary
-                $last_space = strrpos($summary, ' ');
+            // Ensure the summary doesn't exceed the character limit (use multi-byte functions for non-English support)
+            if (mb_strlen($summary, 'UTF-8') > $char_count) {
+                $summary = mb_substr($summary, 0, $char_count, 'UTF-8');
+                // Try to cut at a word boundary (multi-byte safe)
+                $last_space = mb_strrpos($summary, ' ', 0, 'UTF-8');
                 if ($last_space !== false) {
-                    $summary = substr($summary, 0, $last_space);
+                    $summary = mb_substr($summary, 0, $last_space, 'UTF-8');
                 }
             }
 

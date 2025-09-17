@@ -12,3 +12,5 @@ dist/**/*.map
 dist/**/*.d.ts
 assets/README.md
 assets/**/*.psd
+.prettierignore
+*.log

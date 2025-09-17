@@ -451,7 +451,6 @@ function ahmaipsu_global_enable_render() {
     if (!$has_api_key) {
         echo '<div class="notice notice-warning inline ahmaipsu-warning-notice">';
         echo '<p><strong>⚠️ Warning:</strong> You must enter a valid API key <a href="#api-tab" onclick="jQuery(\'.nav-tab[data-tab=\\\'api\\\']\').click(); return false;">here</a> before enabling global summaries. ';
-        echo 'The checkbox will be enabled automatically once you save an API key.</p>';
         echo '</div>';
         
     } else {
