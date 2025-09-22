@@ -1,8 +1,8 @@
-# Copyright (C) 2025 AI Post Summary
-# This file is distributed under the same license as the AI Post Summary package.
+# Copyright (C) 2025 AHM AI Post Summary
+# This file is distributed under the same license as the AHM AI Post Summary package.
 msgid ""
 msgstr ""
-"Project-Id-Version: AI Post Summary 1.1.6\n"
+"Project-Id-Version: AHM AI Post Summary 1.1.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ahm-ai-post-summary\n"
 "POT-Creation-Date: 2025-09-12 16:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -13,11 +13,11 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
 #: includes/admin-settings.php:98
-msgid "AI Post Summary Settings"
+msgid "AHM AI Post Summary Settings"
 msgstr ""
 
 #: includes/admin-settings.php:99
-msgid "AI Post Summary"
+msgid "AHM AI Post Summary"
 msgstr ""
 
 #: includes/admin-settings.php:108
@@ -45,7 +45,7 @@ msgid "Disclaimer Text"
 msgstr ""
 
 #: includes/post-editor.php:223
-msgid "AI Post Summary"
+msgid "AHM AI Post Summary"
 msgstr ""
 
 #: includes/frontend-display.php:44
@@ -97,7 +97,7 @@ msgid "Enable automatic summary generation for this post"
 msgstr ""
 
 #: includes/post-editor.php:75
-msgid "Note: Global summary is disabled. Enable it in Settings > AI Post Summary."
+msgid "Note: Global summary is disabled. Enable it in AHM AI Post Summary > Summary."
 msgstr ""
 
 #: includes/post-editor.php:85
@@ -133,7 +133,7 @@ msgid "Post summary generated successfully!"
 msgstr ""
 
 #: includes/post-editor.php:210
-msgid "AI Post Summary Error:"
+msgid "AHM AI Post Summary Error:"
 msgstr ""
 
 #: includes/post-editor.php:280

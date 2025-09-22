@@ -348,6 +348,9 @@
 .ahmaipsu-theme-selector {
   max-width: 1000px;
   margin: 20px 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
 .ahmaipsu-theme-selector > p.description {
@@ -358,14 +361,18 @@
   padding: 12px 16px;
   border-radius: 4px;
   border-left: 4px solid #0073aa;
+  grid-column: 1 / -1;
+}
+
+.ahmaipsu-theme-selector > input[type="hidden"] {
+  display: none;
 }
 
 .ahmaipsu-theme-option {
-  display: grid;
-  grid-template-columns: 40px 1fr 1fr;
-  gap: 20px;
-  align-items: start;
-  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   padding: 20px;
   border: 2px solid #e1e5e9;
   border-radius: 8px;
@@ -388,6 +395,8 @@
   box-shadow: 0 4px 12px rgba(0, 115, 170, 0.15);
 }
 
+/* Radio button styles (not currently used in HTML) */
+/*
 .ahmaipsu-theme-radio {
   display: flex;
   align-items: flex-start;
@@ -402,12 +411,15 @@
   accent-color: #0073aa;
   cursor: pointer;
 }
+*/
 
 .ahmaipsu-theme-info {
-  min-height: 80px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  text-align: center;
+  margin-bottom: 15px;
 }
 
 .ahmaipsu-theme-name {
@@ -426,7 +438,8 @@
 }
 
 .ahmaipsu-theme-preview {
-  min-height: 120px;
+  width: 100%;
+  max-width: 280px;
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid #e1e5e9;
@@ -436,11 +449,6 @@
 
 .ahmaipsu-theme-option:hover .ahmaipsu-theme-preview {
   transform: scale(1.02);
-}
-
-.ahmaipsu-theme-option.selected .ahmaipsu-theme-preview {
-  border-color: #0073aa;
-  box-shadow: 0 0 0 1px #0073aa;
 }
 
 .ahmaipsu-theme-note {
@@ -610,36 +618,34 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .ahmaipsu-theme-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 1024px) {
+  .ahmaipsu-theme-selector {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
   .ahmaipsu-theme-option {
-    grid-template-columns: 40px 1fr;
-    grid-template-rows: auto auto;
-    gap: 15px 20px;
-  }
-
-  .ahmaipsu-theme-radio {
-    grid-row: 1;
-  }
-
-  .ahmaipsu-theme-info {
-    grid-row: 1;
+    padding: 15px;
   }
 
   .ahmaipsu-theme-preview {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    min-height: 100px;
+    max-width: 100%;
   }
 }
 
 @media (max-width: 768px) {
   .ahmaipsu-theme-selector {
-    margin: 15px 0;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 15px;
   }
 
   .ahmaipsu-theme-option {
     padding: 15px;
-    margin-bottom: 20px;
   }
 
   .ahmaipsu-theme-name {
@@ -651,7 +657,7 @@
   }
 
   .ahmaipsu-theme-preview {
-    min-height: 90px;
+    max-width: 100%;
   }
 }
 

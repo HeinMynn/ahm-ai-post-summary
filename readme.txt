@@ -1,4 +1,4 @@
-=== AI Post Summary ===
+=== AHM AI Post Summary ===
 Contributors: aheinmynn
 Tags: ai, summary, seo, automation, content
 Requires at least: 5.0
@@ -12,7 +12,7 @@ Automatically generate AI-powered summaries for your blog posts using Google Gem
 
 == Description ==
 
-**AI Post Summary** is a powerful WordPress plugin that automatically generates concise, engaging summaries for your blog posts using cutting-edge AI technology from Google Gemini or OpenAI ChatGPT.
+**AHM AI Post Summary** is a powerful WordPress plugin that automatically generates concise, engaging summaries for your blog posts using cutting-edge AI technology from Google Gemini or OpenAI ChatGPT.
 
 ### 🚀 Key Features
 
@@ -30,7 +30,7 @@ Automatically generate AI-powered summaries for your blog posts using Google Gem
 * **Real-time Updates**: Backend interface updates automatically when summaries are generated
 * **Top-Level Admin Menu**: Easy access from WordPress admin sidebar
 
-### 💡 Why Use AI Post Summary?
+### 💡 Why Use AHM AI Post Summary?
 
 * **Improve Reader Engagement**: Give readers a quick overview to decide if they want to read the full article
 * **Better SEO**: Search engines love well-structured content with clear summaries
@@ -76,7 +76,7 @@ Automatically generate AI-powered summaries for your blog posts using Google Gem
 
 ### 📚 Documentation
 
-For detailed setup instructions, API key generation guides, and troubleshooting, visit our [documentation](https://github.com/aungheinmynn/ai-post-summary).
+For detailed setup instructions, API key generation guides, and troubleshooting, visit our [documentation](https://github.com/aungheinmynn/ahm-ai-post-summary).
 
 == External Services ==
 
@@ -128,7 +128,7 @@ This plugin relies on third-party AI services to generate summaries. Please be a
 
 1. Log in to your WordPress admin dashboard
 2. Go to Plugins > Add New
-3. Search for "AI Post Summary"
+3. Search for "AHM AI Post Summary"
 4. Click "Install Now" and then "Activate"
 
 ### Manual Installation
@@ -140,10 +140,10 @@ This plugin relies on third-party AI services to generate summaries. Please be a
 
 ### After Installation
 
-1. Go to Settings > AI Post Summary
+1. Go to AHM AI Post Summary > API Keys
 2. Choose your preferred AI provider
 3. Add your API key (instructions provided)
-4. Configure your summary preferences
+4. Configure your summary preferences under Summary tab.
 5. Enable summaries globally
 6. Edit any post to enable/disable summaries per post
 
@@ -270,7 +270,7 @@ You can set your preferred character count in the settings. The default is 200 c
 * Security and performance optimizations
 
 = 1.0.0 =
-Initial release of AI Post Summary. Install now to start generating AI-powered summaries for your content!
+Initial release of AHM AI Post Summary. Install now to start generating AI-powered summaries for your content!
 
 == Support ==
 

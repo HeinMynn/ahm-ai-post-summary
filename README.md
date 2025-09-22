@@ -1,4 +1,4 @@
-# AI Post Summary
+# AHM AI Post Summary
 
 [![WordPress Plugin](https://img.shields.io/badge/WordPress-Plugin-blue.svg)](https://wordpress.org/plugins/ahm-ai-post-summary/)
 [![Requires WordPress](https://img.shields.io/badge/WordPress-5.0+-blue.svg)](https://wordpress.org/)
@@ -39,7 +39,7 @@
 #### From WordPress.org (Recommended)
 
 1. Go to **Plugins > Add New** in your WordPress admin
-2. Search for "AI Post Summary"
+2. Search for "AHM AI Post Summary"
 3. Click **Install Now** and then **Activate**
 
 #### From GitHub (Development)
@@ -57,7 +57,7 @@ wp plugin activate ahm-ai-post-summary
 
 ### Configuration
 
-1. Navigate to **Settings > AI Post Summary** in your WordPress admin
+1. Navigate to **AHM AI Post Summary** in your WordPress admin
 2. Choose your AI provider (Gemini recommended)
 3. Get your API key:
    - **Gemini**: [Google AI Studio](https://aistudio.google.com/app/apikey)

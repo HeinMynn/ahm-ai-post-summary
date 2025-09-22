@@ -1,6 +1,6 @@
 <?php
 /**
- * Post editor integration for AI Post Summary plugin
+ * Post editor integration for AHM AI Post Summary plugin
  *
  * @package AIPostSummary
  * @since   1.0.0
@@ -38,7 +38,7 @@ function ahmaipsu_meta_box_callback($post) {
         
         <?php if (!$global_enabled): ?>
             <p style="color: orange; font-style: italic; margin-top: 10px;">
-                <strong>Note:</strong> Global summary is disabled. Enable it in Settings > AI Post Summary.
+                <strong>Note:</strong> Global summary is disabled. Enable it in AHM AI Post Summary > Summary.
             </p>
         <?php endif; ?>
         
@@ -150,7 +150,7 @@ function ahmaipsu_add_meta_box() {
     foreach ($supported_post_types as $post_type) {
         add_meta_box(
             'ahmaipsu_meta',
-            __('AI Post Summary', 'ahm-ai-post-summary'),
+            __('AHM AI Post Summary', 'ahm-ai-post-summary'),
             'ahmaipsu_meta_box_callback',
             $post_type,
             'side'
@@ -253,14 +253,14 @@ function ahmaipsu_auto_generate($post_id) {
         add_action('admin_notices', function() use ($should_regenerate) {
             $message = $should_regenerate ? 'Post summary regenerated successfully!' : 'Post summary generated successfully!';
             echo '<div class="notice notice-success is-dismissible">';
-            echo '<p><strong>AI Post Summary:</strong> ' . esc_html($message) . '</p>';
+            echo '<p><strong>AHMAI Post Summary:</strong> ' . esc_html($message) . '</p>';
             echo '</div>';
         });
     } else {
         // Add admin notice for failed generation
         add_action('admin_notices', function() use ($summary) {
             echo '<div class="notice notice-error is-dismissible">';
-            echo '<p><strong>AI Post Summary Error:</strong> ' . esc_html($summary->get_error_message()) . '</p>';
+            echo '<p><strong>AHM AI Post Summary Error:</strong> ' . esc_html($summary->get_error_message()) . '</p>';
             echo '</div>';
         });
     }

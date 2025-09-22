@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       AI Post Summary
+ * Plugin Name:       AHM AI Post Summary
  * Plugin URI:        https://wordpress.org/plugins/ahm-ai-post-summary/
  * Description:       Automatically generates AI-powered summaries for your blog posts using Google Gemini or OpenAI ChatGPT. Display summaries at the top of posts to improve reader engagement and SEO.
  * Version: 1.1.6
@@ -13,18 +13,18 @@
  * Text Domain:       ahm-ai-post-summary
  * Domain Path:       /languages
  *
- * AI Post Summary is free software: you can redistribute it and/or modify
+ * AHM AI Post Summary is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * any later version.
  *
- * AI Post Summary is distributed in the hope that it will be useful,
+ * AHM AI Post Summary is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with AI Post Summary. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
+ * along with AHM AI Post Summary. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
  *
  * @package AIPostSummary
  * @version 1.1.6
@@ -38,7 +38,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('AHMAIPSU_VERSION', '1.1.6');
+define('AHMAIPSU_VERSION', '1.1.11');
 define('AHMAIPSU_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AHMAIPSU_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('AHMAIPSU_PLUGIN_FILE', __FILE__);

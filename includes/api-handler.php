@@ -1,6 +1,6 @@
 <?php
 /**
- * API handler for AI Post Summary plugin
+ * API handler for AHM AI Post Summary plugin
  *
  * @package AIPostSummary
  * @since   1.0.0
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * API Handler Class for AI Post Summary plugin
+ * API Handler Class for AHM AI Post Summary plugin
  *
  * Handles communication with AI services (Gemini and ChatGPT)
  *

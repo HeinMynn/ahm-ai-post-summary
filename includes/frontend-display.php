@@ -1,6 +1,6 @@
 <?php
 /**
- * Frontend display for AI Post Summary plugin
+ * Frontend display for AHM AI Post Summary plugin
  *
  * @package AIPostSummary
  * @since   1.0.0
