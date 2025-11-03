@@ -21,6 +21,20 @@
   margin-bottom: 12px;
 }
 
+.ahmaipsu-summary-content ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.ahmaipsu-summary-content li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.ahmaipsu-summary-content li:last-child {
+  margin-bottom: 0;
+}
+
 .ahmaipsu-summary-disclaimer {
   margin-top: 12px;
 }

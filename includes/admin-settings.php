@@ -15,40 +15,42 @@ add_action('admin_menu', 'ahmaipsu_add_admin_menu');
 add_action('admin_init', 'ahmaipsu_settings_init');
 add_action('wp_ajax_ahmaipsu_test', 'ahmaipsu_ajax_test');
 add_action('wp_ajax_ahmaipsu_validate_api_key', 'ahmaipsu_ajax_validate_api_key');
+add_action('wp_ajax_ahmaipsu_dismiss_donate_notice', 'ahmaipsu_dismiss_donate_notice');
 add_action('admin_enqueue_scripts', 'ahmaipsu_admin_scripts');
+add_action('admin_notices', 'ahmaipsu_donate_admin_notice');
 
 function ahmaipsu_admin_scripts($hook) {
-    // Only load on our settings page - now it's a top-level menu
-    if ($hook !== 'toplevel_page_ahmaipsu') {
-        return;
+    // Load on all admin pages for donate notice dismissal functionality
+    // Only load full admin settings scripts on our settings page
+    if ($hook === 'toplevel_page_ahmaipsu') {
+        // Enqueue admin CSS for settings page
+        wp_enqueue_style(
+            'ahmaipsu-admin',
+            AHMAIPSU_PLUGIN_URL . 'dist/css/admin.min.css',
+            array(),
+            AHMAIPSU_VERSION
+        );
+        
+        // Enqueue jQuery (WordPress core)
+        wp_enqueue_script('jquery');
+        
+        // Enqueue our admin settings JavaScript
+        wp_enqueue_script(
+            'ahmaipsu-admin-settings',
+            AHMAIPSU_PLUGIN_URL . 'dist/js/admin-settings.min.js',
+            array('jquery'),
+            AHMAIPSU_VERSION,
+            true
+        );
     }
     
-    // Enqueue admin CSS
-    wp_enqueue_style(
-        'ahmaipsu-admin',
-        AHMAIPSU_PLUGIN_URL . 'dist/css/admin.min.css',
-        array(),
-        AHMAIPSU_VERSION
-    );
-    
-    // Enqueue jQuery (WordPress core)
+    // Always load jQuery for donate notice dismissal on all admin pages
     wp_enqueue_script('jquery');
     
-    // Enqueue our admin settings JavaScript
-    wp_enqueue_script(
-        'ahmaipsu-admin-settings',
-        AHMAIPSU_PLUGIN_URL . 'dist/js/admin-settings.min.js',
-        array('jquery'),
-        AHMAIPSU_VERSION,
-        true
-    );
-    
-    // Localize script with data
-    wp_localize_script('ahmaipsu-admin-settings', 'ahmaipsu_admin_vars', array(
+    // Localize script with data for donate notice dismissal
+    wp_localize_script('jquery', 'ahmaipsu_admin_vars', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'test_nonce' => wp_create_nonce('ahmaipsu_test'),
-        'validate_nonce' => wp_create_nonce('ahmaipsu_test'), // Use same nonce for simplicity
-        'saving_text' => __('Saving...', 'ahm-ai-post-summary'),
     ));
     
     // Add inline script for admin functionality
@@ -115,8 +117,9 @@ function ahmaipsu_ajax_test() {
     
     $options = get_option('ahmaipsu_settings', array());
     $char_count = isset($options['ahmaipsu_char_count']) ? intval($options['ahmaipsu_char_count']) : 200;
+    $content_type = isset($options['ahmaipsu_summary_type']) ? sanitize_text_field($options['ahmaipsu_summary_type']) : 'summary';
     
-    $summary = ahmaipsu_API_Handler::generate_summary($content, $char_count);
+    $summary = ahmaipsu_API_Handler::generate_summary($content, $char_count, $content_type);
     
     if (is_wp_error($summary)) {
         wp_send_json_error($summary->get_error_message());
@@ -155,6 +158,79 @@ function ahmaipsu_ajax_validate_api_key() {
     }
 }
 
+function ahmaipsu_donate_admin_notice() {
+    // Check if user has dismissed the notice for this month
+    $current_user = wp_get_current_user();
+    $dismissed_key = 'ahmaipsu_donate_notice_dismissed_' . gmdate('Y_m');
+    $dismissed = get_user_meta($current_user->ID, $dismissed_key, true);
+
+    if ($dismissed) {
+        return;
+    }
+
+    // Show the notice
+    ?>
+    <div id="ahmaipsu-donate-notice" class="notice notice-info is-dismissible" style="border-left-color: #0070ba;">
+        <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: 500;">
+            ☕ <?php esc_html_e('Enjoying AHM AI Post Summary? Support ongoing development!', 'ahm-ai-post-summary'); ?>
+        </p>
+        <p style="margin: 0 0 15px 0;">
+            <?php esc_html_e('Your support helps maintain and improve this plugin with new features and regular updates.', 'ahm-ai-post-summary'); ?>
+        </p>
+        <a href="https://paypal.com" target="_blank" rel="noopener noreferrer"
+           style="display: inline-block; padding: 8px 16px; background: #0070ba; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; margin-right: 10px;">
+            <?php esc_html_e('Buy Me a Coffee', 'ahm-ai-post-summary'); ?>
+        </a>
+        <button type="button" class="button-link" id="ahmaipsu-donate-remind-later" style="color: #666; text-decoration: none;">
+            <?php esc_html_e('Remind me later', 'ahm-ai-post-summary'); ?>
+        </button>
+    </div>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        // Handle dismiss button
+        $('#ahmaipsu-donate-notice .notice-dismiss').on('click', function() {
+            $.ajax({
+                url: ahmaipsu_admin_vars.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'ahmaipsu_dismiss_donate_notice',
+                    nonce: ahmaipsu_admin_vars.test_nonce
+                }
+            });
+        });
+
+        // Handle "Remind me later" button
+        $('#ahmaipsu-donate-remind-later').on('click', function() {
+            $('#ahmaipsu-donate-notice').fadeOut();
+            $.ajax({
+                url: ahmaipsu_admin_vars.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'ahmaipsu_dismiss_donate_notice',
+                    nonce: ahmaipsu_admin_vars.test_nonce
+                }
+            });
+        });
+    });
+    </script>
+    <?php
+}
+
+function ahmaipsu_dismiss_donate_notice() {
+    // Verify nonce and user permissions
+    if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'ahmaipsu_test') || !current_user_can('manage_options')) {
+        wp_die(esc_html__('Security check failed', 'ahm-ai-post-summary'));
+    }
+
+    $current_user = wp_get_current_user();
+    $dismissed_key = 'ahmaipsu_donate_notice_dismissed_' . gmdate('Y_m');
+
+    // Store dismissal for current month
+    update_user_meta($current_user->ID, $dismissed_key, '1');
+
+    wp_die();
+}
+
 function ahmaipsu_add_admin_menu() {
     add_menu_page(
         'AHM AI Post Summary Settings',        // Page title
@@ -184,7 +260,7 @@ function ahmaipsu_sanitize_settings($input) {
     // Sanitize character count
     if (isset($input['ahmaipsu_char_count'])) {
         $char_count = intval($input['ahmaipsu_char_count']);
-        $sanitized['ahmaipsu_char_count'] = ($char_count >= 50 && $char_count <= 1000) ? $char_count : 200;
+        $sanitized['ahmaipsu_char_count'] = ($char_count >= 50 && $char_count <= 1500) ? $char_count : 200;
     }
     
     // Sanitize global enable checkbox - only allow if API key is present
@@ -238,6 +314,27 @@ function ahmaipsu_sanitize_settings($input) {
         } else {
             $sanitized['ahmaipsu_theme'] = 'classic'; // fallback to classic
         }
+    }
+    
+    // Sanitize Summary type
+    if (isset($input['ahmaipsu_summary_type'])) {
+        $allowed_summary_types = ['summary', 'key_takeaways'];
+        $summary_type = sanitize_text_field($input['ahmaipsu_summary_type']);
+        if (in_array($summary_type, $allowed_summary_types)) {
+            $sanitized['ahmaipsu_summary_type'] = $summary_type;
+        } else {
+            $sanitized['ahmaipsu_summary_type'] = 'summary'; // fallback to summary
+        }
+    }
+    
+    // Sanitize custom summary title
+    if (isset($input['ahmaipsu_custom_summary_title'])) {
+        $sanitized['ahmaipsu_custom_summary_title'] = sanitize_text_field($input['ahmaipsu_custom_summary_title']);
+    }
+    
+    // Sanitize custom key takeaways title
+    if (isset($input['ahmaipsu_custom_key_takeaways_title'])) {
+        $sanitized['ahmaipsu_custom_key_takeaways_title'] = sanitize_text_field($input['ahmaipsu_custom_key_takeaways_title']);
     }
     
     // Sanitize supported post types
@@ -369,6 +466,30 @@ function ahmaipsu_settings_init() {
         'ahmaipsu',
         'ahmaipsu_display_section'
     );
+
+    add_settings_field(
+        'ahmaipsu_summary_type',
+        __('Content Type', 'ahm-ai-post-summary'),
+        'ahmaipsu_summary_type_render',
+        'ahmaipsu',
+        'ahmaipsu_display_section'
+    );
+
+    add_settings_field(
+        'ahmaipsu_custom_summary_title',
+        __('Custom Summary Title', 'ahm-ai-post-summary'),
+        'ahmaipsu_custom_summary_title_render',
+        'ahmaipsu',
+        'ahmaipsu_display_section'
+    );
+
+    add_settings_field(
+        'ahmaipsu_custom_key_takeaways_title',
+        __('Custom Key Takeaways Title', 'ahm-ai-post-summary'),
+        'ahmaipsu_custom_key_takeaways_title_render',
+        'ahmaipsu',
+        'ahmaipsu_display_section'
+    );
 }
 
 function ahmaipsu_api_provider_render() {
@@ -427,8 +548,8 @@ function ahmaipsu_api_key_render() {
 
 function ahmaipsu_char_count_render() {
     $options = get_option('ahmaipsu_settings');
-    echo '<input type="number" name="ahmaipsu_settings[ahmaipsu_char_count]" value="' . esc_attr($options['ahmaipsu_char_count'] ?? '200') . '" min="50" max="500" />';
-    echo '<p class="description">Set the target length for generated summaries (50-500 characters). Recommended: 200-300 for optimal readability.</p>';
+    echo '<input type="number" name="ahmaipsu_settings[ahmaipsu_char_count]" value="' . esc_attr($options['ahmaipsu_char_count'] ?? '500') . '" min="50" max="1500" />';
+    echo '<p class="description">Set the target length for generated summaries (50-1500 characters). Recommended: 200-500 for optimal readability.</p>';
 }
 
 function ahmaipsu_global_enable_render() {
@@ -507,6 +628,75 @@ function ahmaipsu_disclaimer_render() {
     $disclaimer = $options['ahmaipsu_disclaimer'] ?? 'This summary was generated by AI and may contain inaccuracies or omissions. Please refer to the full article for complete information.';
     echo '<textarea name="ahmaipsu_settings[ahmaipsu_disclaimer]" rows="3" cols="40" class="ahmaipsu-disclaimer-textarea">' . esc_textarea($disclaimer) . '</textarea>';
     echo '<p class="description">This disclaimer will appear below all AI-generated summaries on your site.</p>';
+}
+
+function ahmaipsu_summary_type_render() {
+    $options = get_option('ahmaipsu_settings');
+    $summary_type = $options['ahmaipsu_summary_type'] ?? 'summary';
+    ?>
+    <fieldset>
+        <legend class="screen-reader-text"><?php esc_html_e('Summary Type', 'ahm-ai-post-summary'); ?></legend>
+        <label style="display: block; margin-bottom: 8px;">
+            <input type="radio" name="ahmaipsu_settings[ahmaipsu_summary_type]" value="summary" <?php checked($summary_type, 'summary'); ?> />
+            <?php esc_html_e('Summary', 'ahm-ai-post-summary'); ?> - <?php esc_html_e('Generate a concise overview of the post content.', 'ahm-ai-post-summary'); ?>
+        </label>
+        <label style="display: block; margin-bottom: 8px;">
+            <input type="radio" name="ahmaipsu_settings[ahmaipsu_summary_type]" value="key_takeaways" <?php checked($content_type, 'key_takeaways'); ?> />
+            <?php esc_html_e('Key Takeaways', 'ahm-ai-post-summary'); ?> - <?php esc_html_e('Extract and list the main insights and actionable points as bullet points.', 'ahm-ai-post-summary'); ?>
+        </label>
+    </fieldset>
+    <p class="description"><?php esc_html_e('Choose the type of summary to generate for your posts.', 'ahm-ai-post-summary'); ?></p>
+    <?php
+}
+
+function ahmaipsu_custom_summary_title_render() {
+    $options = get_option('ahmaipsu_settings');
+    $custom_title = $options['ahmaipsu_custom_summary_title'] ?? '';
+    ?>
+    <input type="text" name="ahmaipsu_settings[ahmaipsu_custom_summary_title]" value="<?php echo esc_attr($custom_title); ?>" placeholder="📝 Summary" class="regular-text" />
+    <p class="description"><?php esc_html_e('Custom title for summary content. Leave empty to use theme default. Supports emojis.', 'ahm-ai-post-summary'); ?></p>
+    <?php
+}
+
+function ahmaipsu_custom_key_takeaways_title_render() {
+    $options = get_option('ahmaipsu_settings');
+    $custom_title = $options['ahmaipsu_custom_key_takeaways_title'] ?? '';
+    ?>
+    <input type="text" name="ahmaipsu_settings[ahmaipsu_custom_key_takeaways_title]" value="<?php echo esc_attr($custom_title); ?>" placeholder="🔑 Key Takeaways" class="regular-text" />
+    <p class="description"><?php esc_html_e('Custom title for key takeaways content. Leave empty to use theme default. Supports emojis.', 'ahm-ai-post-summary'); ?></p>
+    <?php
+}
+
+function ahmaipsu_donate_section_callback() {
+    echo '<p>' . esc_html__('If you find this plugin helpful, consider supporting its development. Your donation helps maintain and improve the plugin!', 'ahm-ai-post-summary') . '</p>';
+}
+
+function ahmaipsu_show_donate_render() {
+    $options = get_option('ahmaipsu_settings');
+    $show_donate = isset($options['ahmaipsu_show_donate']) ? $options['ahmaipsu_show_donate'] : false;
+    ?>
+    <input type="checkbox" name="ahmaipsu_settings[ahmaipsu_show_donate]" value="1" <?php checked($show_donate); ?> id="ahmaipsu_show_donate" />
+    <label for="ahmaipsu_show_donate"><?php esc_html_e('Show donate button in admin settings', 'ahm-ai-post-summary'); ?></label>
+    <p class="description"><?php esc_html_e('Display a donate button in the plugin settings to support development.', 'ahm-ai-post-summary'); ?></p>
+    <?php
+}
+
+function ahmaipsu_donate_text_render() {
+    $options = get_option('ahmaipsu_settings');
+    $donate_text = $options['ahmaipsu_donate_text'] ?? '☕ Buy Me a Coffee';
+    ?>
+    <input type="text" name="ahmaipsu_settings[ahmaipsu_donate_text]" value="<?php echo esc_attr($donate_text); ?>" placeholder="☕ Buy Me a Coffee" class="regular-text" />
+    <p class="description"><?php esc_html_e('Text to display on the donate button. Supports emojis.', 'ahm-ai-post-summary'); ?></p>
+    <?php
+}
+
+function ahmaipsu_donate_url_render() {
+    $options = get_option('ahmaipsu_settings');
+    $donate_url = $options['ahmaipsu_donate_url'] ?? '';
+    ?>
+    <input type="url" name="ahmaipsu_settings[ahmaipsu_donate_url]" value="<?php echo esc_attr($donate_url); ?>" placeholder="https://www.paypal.com/donate/..." class="regular-text" />
+    <p class="description"><?php esc_html_e('URL for donations (PayPal, Buy Me a Coffee, Ko-fi, etc.). Leave empty to hide the donate button.', 'ahm-ai-post-summary'); ?></p>
+    <?php
 }
 
 function ahmaipsu_theme_render() {
@@ -620,6 +810,10 @@ function ahmaipsu_options_page() {
             <div id="summary-tab" class="tab-content <?php echo $default_tab === 'summary' ? 'active' : ''; ?>">
                 <table class="form-table" role="presentation">
                     <tr>
+                        <th scope="row"><?php esc_html_e('Summary Type', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_summary_type_render(); ?></td>
+                    </tr>
+                    <tr>
                         <th scope="row"><?php esc_html_e('Summary Character Count', 'ahm-ai-post-summary'); ?></th>
                         <td><?php ahmaipsu_char_count_render(); ?></td>
                     </tr>
@@ -641,6 +835,14 @@ function ahmaipsu_options_page() {
             <!-- Display Tab Content -->
             <div id="display-tab" class="tab-content <?php echo $default_tab === 'display' ? 'active' : ''; ?>">
                 <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Custom Summary Title', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_custom_summary_title_render(); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Custom Key Takeaways Title', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_custom_key_takeaways_title_render(); ?></td>
+                    </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Disclaimer Text', 'ahm-ai-post-summary'); ?></th>
                         <td><?php ahmaipsu_disclaimer_render(); ?></td>
@@ -668,6 +870,17 @@ function ahmaipsu_options_page() {
             
             <?php submit_button(__('Save Settings', 'ahm-ai-post-summary'), 'primary', 'submit', true, array('id' => 'ahmaipsu-save-button')); ?>
         </form>
+        
+        <!-- Buy Me a Coffee Link -->
+        <div class="ahmaipsu-donate-notice" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; text-align: center;">
+            <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: 500;">
+                ☕ <?php esc_html_e('Enjoying this plugin? Support the developer!', 'ahm-ai-post-summary'); ?>
+            </p>
+            <a href="https://paypal.com" target="_blank" rel="noopener noreferrer" 
+               style="display: inline-block; padding: 10px 20px; background: #0070ba; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; transition: background-color 0.3s ease;">
+                <?php esc_html_e('Buy Me a Coffee', 'ahm-ai-post-summary'); ?>
+            </a>
+        </div>
         
         <div class="ahmaipsu-test-container">
             <h3>Generate Summary Test</h3>

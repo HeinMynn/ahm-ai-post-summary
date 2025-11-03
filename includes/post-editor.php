@@ -14,11 +14,17 @@ if (!defined('ABSPATH')) {
 function ahmaipsu_meta_box_callback($post) {
     $enabled = get_post_meta($post->ID, '_ahmaipsu_enabled', true);
     $summary = get_post_meta($post->ID, '_ahmaipsu_content', true);
+    $content_type = get_post_meta($post->ID, '_ahmaipsu_content_type', true);
     $global_enabled = get_option('ahmaipsu_settings')['ahmaipsu_global_enable'] ?? false;
     
     // For new posts/pages (no existing meta), default to global setting
     if ($enabled === '' && $global_enabled) {
         $enabled = '1';
+    }
+    
+    // Default content type to 'summary' if not set
+    if (empty($content_type)) {
+        $content_type = 'summary';
     }
     
     // Get post type label for display
@@ -35,6 +41,18 @@ function ahmaipsu_meta_box_callback($post) {
             printf(esc_html__('Enable automatic summary generation for this %s', 'ahm-ai-post-summary'), esc_html(strtolower($post_type_label)));
             ?>
         </label>
+        
+        <div style="margin-top: 15px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 8px;">Content Type:</label>
+            <label style="margin-right: 15px;">
+                <input type="radio" name="ahmaipsu_content_type" value="summary" <?php checked($content_type, 'summary'); ?> />
+                Summary
+            </label>
+            <label>
+                <input type="radio" name="ahmaipsu_content_type" value="key_takeaways" <?php checked($content_type, 'key_takeaways'); ?> />
+                Key Takeaways
+            </label>
+        </div>
         
         <?php if (!$global_enabled): ?>
             <p style="color: orange; font-style: italic; margin-top: 10px;">
@@ -165,6 +183,14 @@ function ahmaipsu_save_post_meta($post_id) {
     $enabled = isset($_POST['ahmaipsu_enabled']) ? 1 : 0;
     update_post_meta($post_id, '_ahmaipsu_enabled', $enabled);
     
+    // Save content type
+    if (isset($_POST['ahmaipsu_content_type'])) {
+        $content_type = sanitize_text_field(wp_unslash($_POST['ahmaipsu_content_type']));
+        if (in_array($content_type, ['summary', 'key_takeaways'])) {
+            update_post_meta($post_id, '_ahmaipsu_content_type', $content_type);
+        }
+    }
+    
     // Handle regeneration request - set a flag instead of deleting immediately
     if (isset($_POST['ahmaipsu_regenerate']) && sanitize_text_field(wp_unslash($_POST['ahmaipsu_regenerate'])) === '1') {
         // Set a flag to regenerate summary
@@ -241,7 +267,8 @@ function ahmaipsu_auto_generate($post_id) {
     // Get options for character count setting
     $options = get_option('ahmaipsu_settings');
     $char_count = $options['ahmaipsu_char_count'] ?? 200;
-    $summary = ahmaipsu_API_Handler::generate_summary($post->post_content, $char_count);
+    $content_type = get_post_meta($post_id, '_ahmaipsu_content_type', true) ?: 'summary';
+    $summary = ahmaipsu_API_Handler::generate_summary($post->post_content, $char_count, $content_type);
     
     // Save the summary if generation was successful
     if (!is_wp_error($summary)) {
@@ -336,8 +363,11 @@ function ahmaipsu_ajax_regenerate_instantly() {
             $char_count = 200;
         }
         
+        // Get content type from post meta
+        $content_type = get_post_meta($post_id, '_ahmaipsu_content_type', true) ?: 'summary';
+        
         // Generate summary using API handler
-        $summary = ahmaipsu_API_Handler::generate_summary($post->post_content, $char_count);
+        $summary = ahmaipsu_API_Handler::generate_summary($post->post_content, $char_count, $content_type);
         
         if (is_wp_error($summary)) {
             wp_send_json_error('Failed to generate summary: ' . $summary->get_error_message());

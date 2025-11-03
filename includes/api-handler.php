@@ -482,7 +482,7 @@ class ahmaipsu_API_Handler {
      * @param int    $char_count Target character count
      * @return string|WP_Error   Generated summary or error
      */
-    public static function generate_summary($content, $char_count = 200) {
+    public static function generate_summary($content, $char_count = 200, $content_type = 'summary') {
         $options = get_option('ahmaipsu_settings', array());
         $api_key = isset($options['ahmaipsu_api_key']) ? sanitize_text_field($options['ahmaipsu_api_key']) : '';
         $api_provider = isset($options['ahmaipsu_api_provider']) ? sanitize_text_field($options['ahmaipsu_api_provider']) : 'gemini';
@@ -494,6 +494,7 @@ class ahmaipsu_API_Handler {
         // Sanitize and validate inputs
         $content = wp_strip_all_tags($content);
         $char_count = intval($char_count);
+        $content_type = sanitize_text_field($content_type);
 
         if ($char_count < 50 || $char_count > 1000) {
             $char_count = 200; // Default fallback
@@ -501,13 +502,13 @@ class ahmaipsu_API_Handler {
 
         // Use the selected API provider
         if ($api_provider === 'gemini') {
-            return self::call_gemini_api($content, $char_count, $api_key);
+            return self::call_gemini_api($content, $char_count, $api_key, $content_type);
         } else {
-            return self::call_chatgpt_api($content, $char_count, $api_key);
+            return self::call_chatgpt_api($content, $char_count, $api_key, $content_type);
         }
     }
 
-    private static function call_gemini_api($content, $char_count, $api_key) {
+    private static function call_gemini_api($content, $char_count, $api_key, $content_type = 'summary') {
         // Use only Gemini 2.0 Flash as requested
         $endpoints = array(
             'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $api_key,
@@ -516,11 +517,20 @@ class ahmaipsu_API_Handler {
         // Get language instruction for better AI prompting
         $language_instruction = self::detect_language_instruction($content);
 
-        $prompt = $language_instruction . "\n\n" .
-                 "Please provide a concise summary of the following content in " . $char_count . " characters or less. " .
-                 "Focus on the main points and key information. Make it engaging and readable.\n\n" .
-                 "Make sure to be a full sentence and not cut off in the middle.\n\n" .
-                 "Content to summarize:\n" . $content;
+        if ($content_type === 'key_takeaways') {
+            $prompt = $language_instruction . "\n\n" .
+                     "Extract the key takeaways from the following content and list them as bullet points only. " .
+                     "Do not add any introductory text like 'Here are the key takeaways' or similar. " .
+                     "Limit to " . $char_count . " characters total. Focus on the most important insights, " .
+                     "actionable points, and main conclusions. Start directly with the bullet points.\n\n" .
+                     "Content to analyze:\n" . $content;
+        } else {
+            $prompt = $language_instruction . "\n\n" .
+                     "Please provide a concise summary of the following content in " . $char_count . " characters or less. " .
+                     "Focus on the main points and key information. Make it engaging and readable.\n\n" .
+                     "Make sure to be a full sentence and not cut off in the middle.\n\n" .
+                     "Content to summarize:\n" . $content;
+        }
 
         $body = array(
             'contents' => array(
@@ -598,11 +608,17 @@ class ahmaipsu_API_Handler {
         return $last_error;
     }
 
-    private static function call_chatgpt_api($content, $char_count, $api_key) {
+    private static function call_chatgpt_api($content, $char_count, $api_key, $content_type = 'summary') {
         $url = 'https://api.openai.com/v1/chat/completions';
 
         // Get language instruction for better AI prompting
         $language_instruction = self::detect_language_instruction($content);
+
+        if ($content_type === 'key_takeaways') {
+            $user_content = "Extract the key takeaways from the following content and list them as bullet points only. Do not add any introductory text like 'Here are the key takeaways' or similar. Limit to {$char_count} characters total. Focus on the most important insights, actionable points, and main conclusions. Start directly with the bullet points.\n\nContent to analyze:\n" . $content;
+        } else {
+            $user_content = "Please provide a concise summary of the following content in exactly {$char_count} characters or less. Focus on the main points and key information. Make it engaging and readable.\n\nContent to summarize:\n" . $content;
+        }
 
         $messages = array(
             array(
@@ -611,7 +627,7 @@ class ahmaipsu_API_Handler {
             ),
             array(
                 'role' => 'user',
-                'content' => "Please provide a concise summary of the following content in exactly {} characters or less. Focus on the main points and key information. Make it engaging and readable.\n\nContent to summarize:\n" . $content
+                'content' => $user_content
             )
         );
 

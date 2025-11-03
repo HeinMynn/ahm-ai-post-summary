@@ -1,10 +1,10 @@
 === AHM AI Post Summary ===
 Contributors: aheinmynn
 Tags: ai, summary, seo, automation, content
-Requires at least: 5.0
+Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,7 +76,7 @@ Automatically generate AI-powered summaries for your blog posts using Google Gem
 
 ### 📚 Documentation
 
-For detailed setup instructions, API key generation guides, and troubleshooting, visit our [documentation](https://github.com/aungheinmynn/ahm-ai-post-summary).
+For detailed setup instructions, API key generation guides, and troubleshooting, visit our [documentation](https://github.com/heinmynn/ahm-ai-post-summary).
 
 == External Services ==
 
