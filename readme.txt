@@ -214,6 +214,18 @@ You can set your preferred character count in the settings. The default is 200 c
 
 == Changelog ==
 
+= 1.1.7 =
+* Fixed: Character limit validation now properly allows up to 1500 characters (was previously capped at 1000)
+* Added: Key takeaways feature with automatic bullet point formatting for summary content type
+* Added: Custom title customization for both summary and key takeaways content types
+* Updated: Donate system moved to admin-only with monthly dismissible notices
+* Enhanced: Responsive theme grid layout improvements for better mobile display
+* Improved: Admin interface reorganization with content type moved to Summary tab
+* Fixed: WordPress coding standards compliance (replaced date() with gmdate())
+* Updated: Minimum WordPress version requirement to 5.6
+* Enhanced: Better admin user experience with improved navigation and settings organization
+* Security: Maintained all security standards with proper sanitization and nonce verification
+
 = 1.1.5 =
 * Added: Real-time API key validation with "Validate API Key" button
 * Added: Instant summary regeneration button in post editor
