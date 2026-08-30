@@ -17,6 +17,7 @@
 - **Character Count Control**: Set the desired length of generated summaries (50-1500 characters)
 - **Global Toggle**: Enable or disable summary generation site-wide
 - **API Provider Selection**: Choose between Gemini (preferred) and ChatGPT
+- **Model Picker**: After validating the API key, choose a model from that provider
 - **Test Summary Generation**: Built-in testing tool in admin settings
 
 ### 📝 Post Editor
@@ -63,7 +64,8 @@ wp plugin activate ahm-ai-post-summary
    - **Gemini**: [Google AI Studio](https://aistudio.google.com/app/apikey)
    - **ChatGPT**: [OpenAI Platform](https://platform.openai.com/api-keys)
 4. Enter your API key and validate it
-5. Configure preferences and enable summaries
+5. Choose a model from the list (or keep the default)
+6. Configure preferences and enable summaries
 
 ## 📖 Usage
 

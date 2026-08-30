@@ -1,6 +1,6 @@
 /**
  * Admin Settings JavaScript for AHM AI Post Summary
- * Version: 1.1.6
+ * Version: 1.2.0
  */
 
 (function ($) {
@@ -39,7 +39,7 @@
         $("#chatgpt-instructions").show();
       }
 
-      // Update validation button visibility
+      populateModelSelectFromFallback(provider);
       updateValidationButtonVisibility();
     });
 
@@ -218,6 +218,52 @@
     }, 4000);
   }
 
+
+  function populateModelSelect(models, selected) {
+    var $select = $("#ahmaipsu_model");
+    if (!$select.length) {
+      return;
+    }
+    var current = selected || $select.val();
+    $select.empty();
+    var found = false;
+    $.each(models || [], function (_, model) {
+      var id = model.id || model;
+      var label = model.label || id;
+      var $opt = $("<option></option>").val(id).text(label);
+      if (id === current) {
+        $opt.prop("selected", true);
+        found = true;
+      }
+      $select.append($opt);
+    });
+    if (!found && current) {
+      $select.append($("<option></option>").val(current).text(current).prop("selected", true));
+    }
+  }
+
+  function populateModelSelectFromFallback(provider) {
+    var $select = $("#ahmaipsu_model");
+    if (!$select.length) {
+      return;
+    }
+    var raw =
+      provider === "chatgpt"
+        ? $select.attr("data-fallback-chatgpt")
+        : $select.attr("data-fallback-gemini");
+    var def =
+      provider === "chatgpt"
+        ? $select.attr("data-default-chatgpt")
+        : $select.attr("data-default-gemini");
+    var models = [];
+    try {
+      models = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      models = [];
+    }
+    populateModelSelect(models, def);
+  }
+
   // Function to update validation button visibility
   function updateValidationButtonVisibility() {
     var apiKey = $("#ahmaipsu_api_key").val().trim();
@@ -267,11 +313,29 @@
       },
       success: function (response) {
         if (response.success) {
+          var payload = response.data;
+          var message =
+            payload && typeof payload === "object" ? payload.message : payload;
           resultDiv.html(
             '<div class="notice notice-success inline"><p>' +
-              response.data +
+              message +
               "</p></div>"
           );
+          if (payload && payload.models) {
+            var live = payload.models || [];
+            var ids = {};
+            $.each(live, function (_, model) {
+              ids[model.id || model] = true;
+            });
+            var preferred = $("#ahmaipsu_model").val();
+            if (!ids[preferred]) {
+              preferred = payload.default_model;
+            }
+            if (!ids[preferred] && live.length) {
+              preferred = live[0].id || live[0];
+            }
+            populateModelSelect(live, preferred);
+          }
         } else {
           resultDiv.html(
             '<div class="notice notice-error inline"><p>❌ ' +

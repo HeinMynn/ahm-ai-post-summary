@@ -51,6 +51,7 @@ function ahmaipsu_admin_scripts($hook) {
     wp_localize_script('jquery', 'ahmaipsu_admin_vars', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'test_nonce' => wp_create_nonce('ahmaipsu_test'),
+        'validate_nonce' => wp_create_nonce('ahmaipsu_test'),
     ));
     
     // Add inline script for admin functionality
@@ -151,11 +152,20 @@ function ahmaipsu_ajax_validate_api_key() {
     
     if (is_wp_error($validation_result)) {
         wp_send_json_error($validation_result->get_error_message());
-    } else {
-        $provider_name = ($api_provider === 'gemini') ? 'Gemini' : 'ChatGPT';
-        /* translators: %s: API provider name (Gemini or ChatGPT) */
-        wp_send_json_success(sprintf(esc_html__('✅ %s API key is valid and working correctly!', 'ahm-ai-post-summary'), $provider_name));
     }
+
+    $models = ahmaipsu_API_Handler::list_models($api_key, $api_provider);
+    if (is_wp_error($models)) {
+        $models = ahmaipsu_API_Handler::get_fallback_models($api_provider);
+    }
+
+    $provider_name = ($api_provider === 'gemini') ? 'Gemini' : 'ChatGPT';
+    /* translators: %s: API provider name (Gemini or ChatGPT) */
+    wp_send_json_success(array(
+        'message' => sprintf(esc_html__('✅ %s API key is valid and working correctly!', 'ahm-ai-post-summary'), $provider_name),
+        'models' => $models,
+        'default_model' => ahmaipsu_API_Handler::get_default_model($api_provider),
+    ));
 }
 
 function ahmaipsu_donate_admin_notice() {
@@ -255,6 +265,13 @@ function ahmaipsu_sanitize_settings($input) {
     // Sanitize API key
     if (isset($input['ahmaipsu_api_key'])) {
         $sanitized['ahmaipsu_api_key'] = sanitize_text_field($input['ahmaipsu_api_key']);
+    }
+
+    // Sanitize model ID
+    if (isset($input['ahmaipsu_model'])) {
+        $model = ahmaipsu_API_Handler::sanitize_model_id($input['ahmaipsu_model']);
+        $provider = isset($sanitized['ahmaipsu_api_provider']) ? $sanitized['ahmaipsu_api_provider'] : 'gemini';
+        $sanitized['ahmaipsu_model'] = ($model !== '') ? $model : ahmaipsu_API_Handler::get_default_model($provider);
     }
     
     // Sanitize character count
@@ -403,6 +420,14 @@ function ahmaipsu_settings_init() {
         'ahmaipsu_api_section'
     );
 
+    add_settings_field(
+        'ahmaipsu_model',
+        __('Model', 'ahm-ai-post-summary'),
+        'ahmaipsu_model_render',
+        'ahmaipsu',
+        'ahmaipsu_api_section'
+    );
+
     // Summary Settings Section
     add_settings_section(
         'ahmaipsu_summary_section',
@@ -497,7 +522,7 @@ function ahmaipsu_api_provider_render() {
     $provider = isset($options['ahmaipsu_api_provider']) ? $options['ahmaipsu_api_provider'] : 'gemini';
     ?>
     <select name="ahmaipsu_settings[ahmaipsu_api_provider]" id="ahmaipsu_api_provider">
-        <option value="gemini" <?php selected($provider, 'gemini'); ?>>Gemini 2.0 Flash</option>
+        <option value="gemini" <?php selected($provider, 'gemini'); ?>>Google Gemini</option>
         <option value="chatgpt" <?php selected($provider, 'chatgpt'); ?>>ChatGPT</option>
     </select>
     <p class="description">Choose your preferred AI service. Gemini is recommended for better performance and lower costs.</p>
@@ -544,6 +569,38 @@ function ahmaipsu_api_key_render() {
     echo '<em>⚠️ Note: You may need to add billing information to use the API.</em>';
     echo '</p>';
     echo '</div>';
+}
+
+
+function ahmaipsu_model_render() {
+    $options = get_option('ahmaipsu_settings', array());
+    $provider = isset($options['ahmaipsu_api_provider']) ? $options['ahmaipsu_api_provider'] : 'gemini';
+    $saved = isset($options['ahmaipsu_model']) ? $options['ahmaipsu_model'] : '';
+    $selected = ahmaipsu_API_Handler::resolve_model($provider, $saved);
+    $models = ahmaipsu_API_Handler::get_fallback_models($provider);
+    $gemini_fallback = ahmaipsu_API_Handler::get_fallback_models('gemini');
+    $openai_fallback = ahmaipsu_API_Handler::get_fallback_models('chatgpt');
+
+    echo '<select name="ahmaipsu_settings[ahmaipsu_model]" id="ahmaipsu_model"';
+    echo ' data-fallback-gemini="' . esc_attr(wp_json_encode($gemini_fallback)) . '"';
+    echo ' data-fallback-chatgpt="' . esc_attr(wp_json_encode($openai_fallback)) . '"';
+    echo ' data-default-gemini="' . esc_attr(ahmaipsu_API_Handler::get_default_model('gemini')) . '"';
+    echo ' data-default-chatgpt="' . esc_attr(ahmaipsu_API_Handler::get_default_model('chatgpt')) . '">';
+
+    $found = false;
+    foreach ($models as $model) {
+        $id = $model['id'];
+        $label = $model['label'];
+        if ($id === $selected) {
+            $found = true;
+        }
+        echo '<option value="' . esc_attr($id) . '" ' . selected($selected, $id, false) . '>' . esc_html($label) . '</option>';
+    }
+    if (!$found && $selected !== '') {
+        echo '<option value="' . esc_attr($selected) . '" selected>' . esc_html($selected) . '</option>';
+    }
+    echo '</select>';
+    echo '<p class="description">' . esc_html__('Choose a model for the selected provider. Validate your API key to refresh the live list.', 'ahm-ai-post-summary') . '</p>';
 }
 
 function ahmaipsu_char_count_render() {

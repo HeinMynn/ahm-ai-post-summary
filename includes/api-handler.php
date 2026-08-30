@@ -35,8 +35,8 @@ class ahmaipsu_API_Handler {
 
         // Basic format validation
         if ($api_provider === 'gemini') {
-            // Gemini API keys typically start with specific prefixes
-            if (!preg_match('/^[A-Za-z0-9_-]{20,}$/', $api_key)) {
+            // Gemini keys: legacy AIza... (no dots) or 2026 auth keys AQ....
+            if (!preg_match('/^[A-Za-z0-9._-]{20,}$/', $api_key)) {
                 return new WP_Error('invalid_format', esc_html__('Invalid Gemini API key format. Please check your key.', 'ahm-ai-post-summary'));
             }
         } elseif ($api_provider === 'chatgpt') {
@@ -54,6 +54,181 @@ class ahmaipsu_API_Handler {
         }
 
         return true;
+    }
+
+    /**
+     * Default model ID for a provider (backward compatible with 1.1.x).
+     *
+     * @param string $api_provider Provider slug.
+     * @return string
+     */
+    public static function get_default_model($api_provider) {
+        return ($api_provider === 'chatgpt') ? 'gpt-3.5-turbo' : 'gemini-3.6-flash';
+    }
+
+    /**
+     * Curated fallback models if live listing fails.
+     *
+     * @param string $api_provider Provider slug.
+     * @return array[] Array of array(id, label).
+     */
+    public static function get_fallback_models($api_provider) {
+        if ($api_provider === 'chatgpt') {
+            return array(
+                array('id' => 'gpt-3.5-turbo', 'label' => 'gpt-3.5-turbo'),
+                array('id' => 'gpt-4o-mini', 'label' => 'gpt-4o-mini'),
+                array('id' => 'gpt-4o', 'label' => 'gpt-4o'),
+                array('id' => 'gpt-4-turbo', 'label' => 'gpt-4-turbo'),
+            );
+        }
+
+        return array(
+            array('id' => 'gemini-3.6-flash', 'label' => 'gemini-3.6-flash'),
+            array('id' => 'gemini-flash-lite-latest', 'label' => 'gemini-flash-lite-latest'),
+            array('id' => 'gemini-3.5-flash-lite', 'label' => 'gemini-3.5-flash-lite'),
+            array('id' => 'gemini-flash-latest', 'label' => 'gemini-flash-latest'),
+            array('id' => 'gemini-2.0-flash', 'label' => 'gemini-2.0-flash'),
+        );
+    }
+
+    /**
+     * Sanitize a model ID for use in API URLs and settings.
+     *
+     * @param string $model Raw model ID.
+     * @return string
+     */
+    public static function sanitize_model_id($model) {
+        $model = sanitize_text_field($model);
+        $model = preg_replace('#^models/#', '', $model);
+        if (!preg_match('/^[A-Za-z0-9._\-\/]+$/', $model)) {
+            return '';
+        }
+        return $model;
+    }
+
+    /**
+     * Resolve the model to call: saved setting, else provider default.
+     *
+     * @param string $api_provider Provider slug.
+     * @param string $saved        Saved model ID.
+     * @return string
+     */
+    public static function resolve_model($api_provider, $saved = '') {
+        $model = self::sanitize_model_id($saved);
+        if ($model === '') {
+            $model = self::get_default_model($api_provider);
+        }
+        return $model;
+    }
+
+    /**
+     * List usable models for a provider using a live API key.
+     *
+     * @param string $api_key      API key.
+     * @param string $api_provider Provider slug.
+     * @return array[]|WP_Error
+     */
+    public static function list_models($api_key, $api_provider = 'gemini') {
+        if ($api_provider === 'chatgpt') {
+            return self::list_openai_models($api_key);
+        }
+        return self::list_gemini_models($api_key);
+    }
+
+    /**
+     * List Gemini models that support generateContent.
+     *
+     * @param string $api_key API key.
+     * @return array[]|WP_Error
+     */
+    private static function list_gemini_models($api_key) {
+        $list_url = 'https://generativelanguage.googleapis.com/v1beta/models?key=' . $api_key;
+        $list_response = wp_remote_get($list_url, array('timeout' => 15));
+
+        if (is_wp_error($list_response)) {
+            return $list_response;
+        }
+
+        if (wp_remote_retrieve_response_code($list_response) !== 200) {
+            return new WP_Error('list_failed', esc_html__('Unable to list Gemini models.', 'ahm-ai-post-summary'));
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($list_response), true);
+        if (!is_array($data) || empty($data['models']) || !is_array($data['models'])) {
+            return self::get_fallback_models('gemini');
+        }
+
+        $models = array();
+        foreach ($data['models'] as $item) {
+            $methods = isset($item['supportedGenerationMethods']) && is_array($item['supportedGenerationMethods'])
+                ? $item['supportedGenerationMethods']
+                : array();
+            if (!in_array('generateContent', $methods, true)) {
+                continue;
+            }
+            $id = self::sanitize_model_id(isset($item['name']) ? $item['name'] : '');
+            if ($id === '') {
+                continue;
+            }
+            // Skip non-text models that still advertise generateContent.
+            if (preg_match('/(tts|image|audio|video|robotics)/i', $id)) {
+                continue;
+            }
+            $label = isset($item['displayName']) ? sanitize_text_field($item['displayName']) : $id;
+            $models[] = array('id' => $id, 'label' => $label . ' (' . $id . ')');
+        }
+
+        return !empty($models) ? $models : self::get_fallback_models('gemini');
+    }
+
+    /**
+     * List OpenAI chat-capable models.
+     *
+     * @param string $api_key API key.
+     * @return array[]|WP_Error
+     */
+    private static function list_openai_models($api_key) {
+        $models_response = wp_remote_get('https://api.openai.com/v1/models', array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json',
+            ),
+            'timeout' => 15,
+        ));
+
+        if (is_wp_error($models_response)) {
+            return $models_response;
+        }
+
+        if (wp_remote_retrieve_response_code($models_response) !== 200) {
+            return new WP_Error('list_failed', esc_html__('Unable to list OpenAI models.', 'ahm-ai-post-summary'));
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($models_response), true);
+        if (!is_array($data) || empty($data['data']) || !is_array($data['data'])) {
+            return self::get_fallback_models('chatgpt');
+        }
+
+        $models = array();
+        foreach ($data['data'] as $item) {
+            $id = self::sanitize_model_id(isset($item['id']) ? $item['id'] : '');
+            if ($id === '') {
+                continue;
+            }
+            if (!preg_match('/^(gpt-|o[1-9]|chatgpt-)/', $id)) {
+                continue;
+            }
+            if (preg_match('/(instruct|audio|realtime|image|tts|whisper|transcribe|search|moderation|davinci|babbage|ada|curie)/', $id)) {
+                continue;
+            }
+            $models[] = array('id' => $id, 'label' => $id);
+        }
+
+        usort($models, function ($a, $b) {
+            return strcmp($a['id'], $b['id']);
+        });
+
+        return !empty($models) ? $models : self::get_fallback_models('chatgpt');
     }
 
     /**
@@ -108,7 +283,7 @@ class ahmaipsu_API_Handler {
 
         // If listing models fails, try generation endpoints as fallback
         $endpoints = array(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $api_key,
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=' . $api_key,
         );
 
         $body = array(
@@ -206,7 +381,7 @@ class ahmaipsu_API_Handler {
         $url = 'https://api.openai.com/v1/chat/completions';
 
         $body = array(
-            'model' => 'gpt-3.5-turbo',
+            'model' => $model,
             'messages' => array(
                 array(
                     'role' => 'user',
@@ -500,18 +675,21 @@ class ahmaipsu_API_Handler {
             $char_count = 200; // Default fallback
         }
 
+        $saved_model = isset($options['ahmaipsu_model']) ? $options['ahmaipsu_model'] : '';
+        $model = self::resolve_model($api_provider, $saved_model);
+
         // Use the selected API provider
         if ($api_provider === 'gemini') {
-            return self::call_gemini_api($content, $char_count, $api_key, $content_type);
+            return self::call_gemini_api($content, $char_count, $api_key, $content_type, $model);
         } else {
-            return self::call_chatgpt_api($content, $char_count, $api_key, $content_type);
+            return self::call_chatgpt_api($content, $char_count, $api_key, $content_type, $model);
         }
     }
 
-    private static function call_gemini_api($content, $char_count, $api_key, $content_type = 'summary') {
-        // Use only Gemini 2.0 Flash as requested
+    private static function call_gemini_api($content, $char_count, $api_key, $content_type = 'summary', $model = '') {
+        $model = self::resolve_model('gemini', $model);
         $endpoints = array(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $api_key,
+            'https://generativelanguage.googleapis.com/v1beta/models/' . $model . ':generateContent?key=' . $api_key,
         );
         
         // Get language instruction for better AI prompting
@@ -608,8 +786,9 @@ class ahmaipsu_API_Handler {
         return $last_error;
     }
 
-    private static function call_chatgpt_api($content, $char_count, $api_key, $content_type = 'summary') {
+    private static function call_chatgpt_api($content, $char_count, $api_key, $content_type = 'summary', $model = '') {
         $url = 'https://api.openai.com/v1/chat/completions';
+        $model = self::resolve_model('chatgpt', $model);
 
         // Get language instruction for better AI prompting
         $language_instruction = self::detect_language_instruction($content);
@@ -632,7 +811,7 @@ class ahmaipsu_API_Handler {
         );
 
         $body = array(
-            'model' => 'gpt-3.5-turbo',
+            'model' => $model,
             'messages' => $messages,
             'max_tokens' => 500,
             'temperature' => 0.3,

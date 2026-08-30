@@ -4,7 +4,7 @@ Tags: ai, summary, seo, automation, content
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.9
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,6 +18,7 @@ Automatically generate AI-powered summaries for your blog posts using Google Gem
 
 * **Automatic Summary Generation**: Summaries are created automatically when posts are published or updated
 * **Multiple AI Providers**: Choose between Google Gemini (recommended) or OpenAI ChatGPT
+* **Model Picker**: Select a model from the provider after validating your API key
 * **API Key Validation**: Real-time validation ensures your API keys work before you save settings
 * **Instant Summary Regeneration**: Regenerate summaries instantly from the post editor
 * **Smart Language Detection**: Automatically detects content language and generates summaries in the same language
@@ -213,6 +214,13 @@ You can set your preferred character count in the settings. The default is 200 c
 4. Summary generation in action with real-time updates
 
 == Changelog ==
+
+= 1.2.0 =
+* Added: Model picker after API key validation (Gemini generateContent models, OpenAI chat models)
+* Added: Curated fallback model list if live listing fails
+* Added: Accept Gemini auth keys (AQ.) as well as legacy AIza keys
+* Changed: Gemini default model is gemini-3.6-flash (gemini-2.0-flash is retired for new keys)
+* OpenAI remains curated fallback (untested live in this release)
 
 = 1.1.9 =
 * Updated: Tested up to WordPress 7.1
