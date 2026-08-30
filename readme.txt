@@ -2,9 +2,9 @@
 Contributors: aheinmynn
 Tags: ai, summary, seo, automation, content
 Requires at least: 5.6
-Tested up to: 6.8
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.7
+Stable tag: 1.1.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,7 +22,7 @@ Automatically generate AI-powered summaries for your blog posts using Google Gem
 * **Instant Summary Regeneration**: Regenerate summaries instantly from the post editor
 * **Smart Language Detection**: Automatically detects content language and generates summaries in the same language
 * **Per-Post Control**: Enable or disable summaries for individual posts
-* **Customizable Length**: Set your preferred summary character count (50-1000 characters)
+* **Customizable Length**: Set your preferred summary character count (50-1500 characters)
 * **Frontend Display**: Summaries appear automatically at the top of posts
 * **SEO-Friendly**: Improve your content's search engine visibility
 * **Easy Setup**: Simple configuration with step-by-step API key instructions
@@ -213,6 +213,23 @@ You can set your preferred character count in the settings. The default is 200 c
 4. Summary generation in action with real-time updates
 
 == Changelog ==
+
+= 1.1.9 =
+* Updated: Tested up to WordPress 7.1
+* Fixed: Summary generation now actually allows 50-1500 characters (values above 1000 were still clamped to 200)
+* Fixed: Version strings are consistent across the plugin header, constant, docblock, readme, and package.json
+
+= 1.1.8 =
+* Fixed: Character limit validation now properly allows up to 1500 characters (was previously capped at 1000)
+* Added: Key takeaways feature with automatic bullet point formatting for summary content type
+* Added: Custom title customization for both summary and key takeaways content types
+* Updated: Donate system moved to admin-only with monthly dismissible notices
+* Enhanced: Responsive theme grid layout improvements for better mobile display
+* Improved: Admin interface reorganization with content type moved to Summary tab
+* Fixed: WordPress coding standards compliance (replaced date() with gmdate())
+* Updated: Minimum WordPress version requirement to 5.6
+* Enhanced: Better admin user experience with improved navigation and settings organization
+* Security: Maintained all security standards with proper sanitization and nonce verification
 
 = 1.1.5 =
 * Added: Real-time API key validation with "Validate API Key" button

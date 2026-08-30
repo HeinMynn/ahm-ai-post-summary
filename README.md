@@ -14,7 +14,7 @@
 ### 🔧 Admin Panel
 
 - **Secure API Key Storage**: Safely store Gemini or ChatGPT API keys using WordPress options API
-- **Character Count Control**: Set the desired length of generated summaries (50-1000 characters)
+- **Character Count Control**: Set the desired length of generated summaries (50-1500 characters)
 - **Global Toggle**: Enable or disable summary generation site-wide
 - **API Provider Selection**: Choose between Gemini (preferred) and ChatGPT
 - **Test Summary Generation**: Built-in testing tool in admin settings

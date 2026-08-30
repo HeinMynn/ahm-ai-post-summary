@@ -359,7 +359,7 @@ function ahmaipsu_ajax_regenerate_instantly() {
         // Get character count from settings
         $options = get_option('ahmaipsu_settings', array());
         $char_count = isset($options['ahmaipsu_char_count']) ? intval($options['ahmaipsu_char_count']) : 200;
-        if ($char_count < 50 || $char_count > 1000) {
+        if ($char_count < 50 || $char_count > 1500) {
             $char_count = 200;
         }
         

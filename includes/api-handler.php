@@ -496,7 +496,7 @@ class ahmaipsu_API_Handler {
         $char_count = intval($char_count);
         $content_type = sanitize_text_field($content_type);
 
-        if ($char_count < 50 || $char_count > 1000) {
+        if ($char_count < 50 || $char_count > 1500) {
             $char_count = 200; // Default fallback
         }
 
