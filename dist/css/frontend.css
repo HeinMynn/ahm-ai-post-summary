@@ -1,85 +1,101 @@
 /**
  * Frontend styles for AHM AI Post Summary
- * Version: 1.3.2
+ * Version: 1.3.3
  *
- * Inherit post type. Accent from site primary / currentColor.
- * Surface = theme.json Canvas (base) else transparent. Ink = CanvasText (contrast).
+ * Plugin-owned chrome. Host themes (JNews, etc.) do not restyle this box.
+ * Tokens live here only — not theme.json, not currentColor, not an admin palette.
  */
 
 .ahmaipsu-summary-box {
-  --ahmaipsu-accent: var(--wp--preset--color--primary, currentColor);
-  --ahmaipsu-surface: var(--wp--preset--color--base, var(--wp--preset--color--canvas, transparent));
-  --ahmaipsu-ink: var(--wp--preset--color--contrast, var(--wp--preset--color--canvas-text, currentColor));
-  --ahmaipsu-hairline: color-mix(in srgb, var(--ahmaipsu-ink) 18%, transparent);
-  --ahmaipsu-quiet: color-mix(in srgb, var(--ahmaipsu-ink) 60%, transparent);
+  --ahmaipsu-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ahmaipsu-surface: #fff;
+  --ahmaipsu-ink: #1a1a1a;
+  --ahmaipsu-quiet: color-mix(in srgb, #1a1a1a 60%, transparent);
+  --ahmaipsu-hairline: color-mix(in srgb, #1a1a1a 18%, transparent);
+  --ahmaipsu-accent: #1a1a1a;
   box-sizing: border-box;
+  display: block;
   width: auto;
   max-width: 100%;
   margin: 0 0 24px;
   padding: 0;
-  color: var(--ahmaipsu-ink);
-  font-family: inherit;
-  font-size: inherit;
+  font-family: var(--ahmaipsu-font);
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
   line-height: 1.6;
-  background: transparent;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ahmaipsu-ink);
+  background: var(--ahmaipsu-surface);
+  background-image: none;
   border: 0;
+  border-radius: 0;
   box-shadow: none;
   clear: both;
 }
 
-.ahmaipsu-summary-title {
+.ahmaipsu-summary-box .ahmaipsu-summary-title,
+.ahmaipsu-summary-box .ahmaipsu-summary-content,
+.ahmaipsu-summary-box .ahmaipsu-summary-content p,
+.ahmaipsu-summary-box .ahmaipsu-summary-content ul,
+.ahmaipsu-summary-box .ahmaipsu-summary-content li,
+.ahmaipsu-summary-box .ahmaipsu-summary-disclaimer,
+.ahmaipsu-summary-box .ahmaipsu-summary-disclaimer small {
+  font-family: var(--ahmaipsu-font);
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.6;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ahmaipsu-ink);
+  background: transparent;
+  background-image: none;
   margin: 0;
   padding: 0;
-  font-family: inherit;
-  font-size: inherit;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.ahmaipsu-summary-box .ahmaipsu-summary-title {
+  display: block;
   font-weight: 600;
   line-height: 1.3;
-  color: inherit;
 }
 
-.ahmaipsu-summary-content {
-  margin: 0;
-  color: inherit;
-}
-
-.ahmaipsu-summary-content p {
-  margin: 0;
-}
-
-.ahmaipsu-summary-content ul {
-  margin: 0;
+.ahmaipsu-summary-box .ahmaipsu-summary-content ul {
   padding-left: 16px;
-  list-style: disc;
+  list-style: disc outside;
 }
 
-.ahmaipsu-summary-content li {
+.ahmaipsu-summary-box .ahmaipsu-summary-content li {
+  display: list-item;
   margin: 0 0 0.4em;
-  padding: 0;
   line-height: 1.5;
+  list-style: disc outside;
 }
 
-.ahmaipsu-summary-content li:last-child {
+.ahmaipsu-summary-box .ahmaipsu-summary-content li:last-child {
   margin-bottom: 0;
 }
 
-.ahmaipsu-summary-disclaimer {
+.ahmaipsu-summary-box .ahmaipsu-summary-disclaimer {
   margin: 12px 0 0;
   padding: 8px 0 0;
   border-top: 1px solid var(--ahmaipsu-hairline);
 }
 
-.ahmaipsu-summary-disclaimer small {
+.ahmaipsu-summary-box .ahmaipsu-summary-disclaimer small {
   display: block;
   font-size: 13px;
   font-style: normal;
   line-height: 1.4;
   color: var(--ahmaipsu-quiet);
-  background: none;
-  padding: 0;
-  border-radius: 0;
 }
 
-/* Classic: hairline box, 2px accent underline, Surface not forced white */
+/* Classic: hairline box, 2px accent underline */
 .ahmaipsu-theme-classic {
   padding: 16px;
   background: var(--ahmaipsu-surface);
@@ -93,22 +109,34 @@
   border-bottom: 2px solid var(--ahmaipsu-accent);
 }
 
-/* Minimal: no box, no fill; small tracked label; 8px above/below label */
+/* Minimal: no box, no fill; small tracked label. Body ink inherit on dark posts. */
 .ahmaipsu-theme-minimal {
   padding: 0;
   background: transparent;
+  color: inherit;
   border: 0;
 }
 
 .ahmaipsu-theme-minimal .ahmaipsu-summary-title {
   margin: 8px 0;
-  font-size: 0.75em;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-/* Modern: kicker + 2px accent bar on top of a Surface panel. No gradient. */
+.ahmaipsu-theme-minimal .ahmaipsu-summary-content,
+.ahmaipsu-theme-minimal .ahmaipsu-summary-content p,
+.ahmaipsu-theme-minimal .ahmaipsu-summary-content ul,
+.ahmaipsu-theme-minimal .ahmaipsu-summary-content li {
+  color: inherit;
+}
+
+.ahmaipsu-theme-minimal .ahmaipsu-summary-disclaimer small {
+  color: var(--ahmaipsu-quiet);
+}
+
+/* Modern: kicker + 2px top bar. No gradient. */
 .ahmaipsu-theme-modern {
   padding: 16px;
   background: var(--ahmaipsu-surface);
@@ -118,24 +146,24 @@
 
 .ahmaipsu-theme-modern .ahmaipsu-summary-title {
   margin: 0 0 8px;
-  font-size: 0.75em;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-/* Elegant: italic title + 3px left accent. Inherit type. No purple, no Georgia. */
+/* Elegant: italic Georgia title only + 3px left bar. Body stays system-ui. */
 .ahmaipsu-theme-elegant {
   padding: 16px;
   background: var(--ahmaipsu-surface);
   border: 0;
   border-left: 3px solid var(--ahmaipsu-accent);
-  font-family: inherit;
 }
 
 .ahmaipsu-theme-elegant .ahmaipsu-summary-title {
   margin: 0 0 12px;
-  font-family: inherit;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
   font-weight: 400;
   font-style: italic;
 }
@@ -146,16 +174,9 @@
   background: var(--ahmaipsu-surface);
   border: 1px solid var(--ahmaipsu-hairline);
   border-radius: 8px;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--ahmaipsu-ink) 10%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, #1a1a1a 10%, transparent);
 }
 
 .ahmaipsu-theme-card .ahmaipsu-summary-title {
   margin: 0 0 16px;
-}
-
-.ahmaipsu-theme-card .ahmaipsu-summary-disclaimer small {
-  background: none;
-  padding: 0;
-  border-radius: 0;
-  display: block;
 }

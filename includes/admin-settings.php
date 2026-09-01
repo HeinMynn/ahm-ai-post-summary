@@ -879,7 +879,7 @@ function ahmaipsu_theme_render() {
         
         echo '<div class="ahmaipsu-theme-preview">';
         echo '<div class="ahmaipsu-summary-box ahmaipsu-theme-' . esc_attr($theme_key) . '">';
-        echo '<h4 class="ahmaipsu-summary-title">' . esc_html($theme_data['title']) . '</h4>';
+        echo '<p class="ahmaipsu-summary-title">' . esc_html($theme_data['title']) . '</p>';
         echo '<div class="ahmaipsu-summary-content"><p>' . esc_html($theme_data['body']) . '</p></div>';
         echo '<div class="ahmaipsu-summary-disclaimer"><small>ℹ️ ' . esc_html($disclaimer) . '</small></div>';
         echo '</div>';

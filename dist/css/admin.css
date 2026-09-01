@@ -127,7 +127,7 @@
   display: none;
 }
 
-.ahmaipsu-summary-title {
+.ahmaipsu-summary-preview .ahmaipsu-summary-title {
   margin: 0 0 10px 0;
   color: #0073aa;
 }
@@ -467,15 +467,10 @@
   line-height: 1.5;
 }
 
-/* Admin picker stays light; previews use frontend box classes. */
-.wp-admin .ahmaipsu-theme-preview {
+.ahmaipsu-theme-preview {
   overflow: visible;
-  background: #fff;
 }
-.wp-admin .ahmaipsu-theme-preview .ahmaipsu-summary-box {
-  --ahmaipsu-surface: #fff;
-  --ahmaipsu-ink: #1d2327;
-  --ahmaipsu-accent: currentColor;
+.ahmaipsu-theme-preview .ahmaipsu-summary-box {
   margin-bottom: 0;
 }
 

@@ -125,7 +125,7 @@ function ahmaipsu_render_summary($summary, $disclaimer, $theme = 'classic', $con
     
     $html = '<div class="ahmaipsu-summary-box ' . esc_attr($theme_class) . '">';
     if ($show_title) {
-        $html .= '<h4 class="ahmaipsu-summary-title">' . esc_html($theme_title) . '</h4>';
+        $html .= '<p class="ahmaipsu-summary-title">' . esc_html($theme_title) . '</p>';
     }
     $html .= '<div class="ahmaipsu-summary-content">' . $formatted_content . '</div>';
     if ($show_disclaimer) {

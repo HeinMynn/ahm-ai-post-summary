@@ -160,7 +160,7 @@ export default function Edit({ attributes, setAttributes, className }) {
 	if (!postEnabled) {
 		body = (
 			<>
-				{showTitle && <h4 className="ahmaipsu-summary-title">{__('Summary', 'ahm-ai-post-summary')}</h4>}
+				{showTitle && <p className="ahmaipsu-summary-title">{__('Summary', 'ahm-ai-post-summary')}</p>}
 				<div className="ahmaipsu-summary-content">{__('Summary is off for this post.', 'ahm-ai-post-summary')}</div>
 				<p className="ahmaipsu-block-helper">{__('Turn it on to show a TL;DR here.', 'ahm-ai-post-summary')}</p>
 				<Button variant="secondary" onClick={onTurnOn} disabled={busy}>
@@ -171,7 +171,7 @@ export default function Edit({ attributes, setAttributes, className }) {
 	} else if (!hasSummary) {
 		body = (
 			<>
-				{showTitle && <h4 className="ahmaipsu-summary-title">{heading}</h4>}
+				{showTitle && <p className="ahmaipsu-summary-title">{heading}</p>}
 				<div className="ahmaipsu-summary-content">{__('No summary yet.', 'ahm-ai-post-summary')}</div>
 				<p className="ahmaipsu-block-helper">{__('Generate one, or it will fill when this post is published.', 'ahm-ai-post-summary')}</p>
 				<Button variant="secondary" onClick={onGenerate} disabled={busy}>
@@ -182,7 +182,7 @@ export default function Edit({ attributes, setAttributes, className }) {
 	} else {
 		body = (
 			<>
-				{showTitle && <h4 className="ahmaipsu-summary-title">{heading}</h4>}
+				{showTitle && <p className="ahmaipsu-summary-title">{heading}</p>}
 				<div className="ahmaipsu-summary-content">{formatBody(summary, contentType)}</div>
 				{showDisclaimer && (
 					<div className="ahmaipsu-summary-disclaimer">
