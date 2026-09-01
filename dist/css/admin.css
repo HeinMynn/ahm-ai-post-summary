@@ -467,154 +467,16 @@
   line-height: 1.5;
 }
 
-/* Theme Preview Styles */
-.ahmaipsu-preview-classic {
-  padding: 16px;
-  background: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  border-bottom: 1px solid #e1e5e9;
+/* Admin picker stays light; previews use frontend box classes. */
+.wp-admin .ahmaipsu-theme-preview {
+  overflow: visible;
+  background: #fff;
 }
-
-.ahmaipsu-preview-classic h4 {
-  margin: 0 0 12px 0;
-  color: #1d2327;
-  font-size: 16px;
-  font-weight: 600;
-  border-bottom: 2px solid #0073aa;
-  padding-bottom: 6px;
-  display: inline-block;
-}
-
-.ahmaipsu-preview-classic p {
-  margin: 0 0 12px 0;
-  color: #3c434a;
-  line-height: 1.6;
-  font-size: 14px;
-}
-
-.ahmaipsu-preview-classic small {
-  color: #646970;
-  font-style: italic;
-  font-size: 12px;
-  display: block;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #f0f0f1;
-}
-
-.ahmaipsu-preview-minimal {
-  padding: 16px;
-  background: #f6f7f7;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-.ahmaipsu-preview-minimal h4 {
-  margin: 0 0 12px 0;
-  color: #1d2327;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.ahmaipsu-preview-minimal p {
-  margin: 0 0 12px 0;
-  color: #3c434a;
-  line-height: 1.5;
-  font-size: 14px;
-}
-
-.ahmaipsu-preview-minimal small {
-  color: #646970;
-  font-size: 12px;
-}
-
-.ahmaipsu-preview-modern {
-  padding: 18px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-.ahmaipsu-preview-modern h4 {
-  margin: 0 0 12px 0;
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.ahmaipsu-preview-modern p {
-  margin: 0 0 12px 0;
-  color: rgba(255, 255, 255, 0.95);
-  line-height: 1.6;
-  font-size: 14px;
-}
-
-.ahmaipsu-preview-modern small {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 12px;
-}
-
-.ahmaipsu-preview-elegant {
-  padding: 20px;
-  background: #ffffff;
-  border-left: 4px solid #8e44ad;
-  font-family: Georgia, "Times New Roman", serif;
-}
-
-.ahmaipsu-preview-elegant h4 {
-  margin: 0 0 14px 0;
-  color: #8e44ad;
-  font-size: 18px;
-  font-weight: 400;
-  font-style: italic;
-}
-
-.ahmaipsu-preview-elegant p {
-  margin: 0 0 14px 0;
-  color: #2c3e50;
-  line-height: 1.7;
-  font-size: 15px;
-}
-
-.ahmaipsu-preview-elegant small {
-  color: #7f8c8d;
-  font-size: 13px;
-  font-style: italic;
-}
-
-.ahmaipsu-preview-card {
-  padding: 18px;
-  background: #ffffff;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  margin: 4px;
-}
-
-.ahmaipsu-preview-card h4 {
-  margin: 0 0 14px 0;
-  color: #2c3e50;
-  font-size: 16px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.ahmaipsu-preview-card p {
-  margin: 0 0 14px 0;
-  color: #3c434a;
-  line-height: 1.6;
-  font-size: 14px;
-}
-
-.ahmaipsu-preview-card small {
-  color: #646970;
-  font-size: 12px;
-  background: #f0f0f1;
-  padding: 4px 8px;
-  border-radius: 3px;
-  display: inline-block;
+.wp-admin .ahmaipsu-theme-preview .ahmaipsu-summary-box {
+  --ahmaipsu-surface: #fff;
+  --ahmaipsu-ink: #1d2327;
+  --ahmaipsu-accent: currentColor;
+  margin-bottom: 0;
 }
 
 /* Responsive Design */
