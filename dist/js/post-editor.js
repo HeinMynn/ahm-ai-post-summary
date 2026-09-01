@@ -277,6 +277,23 @@
           $("#gpt-summary-status").hide();
         }, 30000);
       }
+
+    // Gutenberg REST save uses the editor meta store, not the classic metabox POST.
+    // Keep Content Type (and enable) in sync so Key Takeaways is not overwritten.
+    function syncMetaToEditor(meta) {
+      if (!window.wp || !wp.data || !wp.data.dispatch) {
+        return;
+      }
+      try {
+        wp.data.dispatch("core/editor").editPost({ meta: meta });
+      } catch (err) {}
+    }
+    $(document).on("change", 'input[name="ahmaipsu_content_type"]', function () {
+      syncMetaToEditor({ _ahmaipsu_content_type: $(this).val() });
+    });
+    $(document).on("change", 'input[name="ahmaipsu_enabled"]', function () {
+      syncMetaToEditor({ _ahmaipsu_enabled: $(this).is(":checked") ? "1" : "0" });
+    });
     });
   });
 })(jQuery);

@@ -4,7 +4,7 @@ Tags: ai, summary, seo, automation, content
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -215,6 +215,9 @@ You can set your preferred character count in the settings (50-1500 characters).
 4. Frontend summary box (Classic) at the top of the post
 
 == Changelog ==
+
+= 1.3.1 =
+* Fixed: Key Takeaways selection now saves on the Summary tab and in the post editor
 
 = 1.3.0 =
 * Added: Write the generated summary to the native WordPress excerpt (archives, RSS, search)

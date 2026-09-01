@@ -22,9 +22,10 @@ function ahmaipsu_meta_box_callback($post) {
         $enabled = '1';
     }
     
-    // Default content type to 'summary' if not set
+    // Default content type from settings if this post has none yet
     if (empty($content_type)) {
-        $content_type = 'summary';
+        $settings = get_option('ahmaipsu_settings', array());
+        $content_type = $settings['ahmaipsu_summary_type'] ?? $settings['ahmaipsu_content_type'] ?? 'summary';
     }
     
     // Get post type label for display
@@ -151,7 +152,7 @@ function ahmaipsu_enqueue_admin_scripts($hook) {
     
     // Localize script with data
     global $post;
-    if ($post && $post->post_type === 'post') {
+    if ($post && in_array($post->post_type, $supported_post_types, true)) {
         wp_localize_script('ahmaipsu-post-editor', 'ahmaipsu_editor_vars', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'post_id' => $post->ID,

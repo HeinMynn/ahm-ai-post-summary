@@ -333,16 +333,22 @@ function ahmaipsu_sanitize_settings($input) {
         }
     }
     
-    // Sanitize Summary type
+    // Sanitize Summary type (keep both option keys in sync)
+    $existing_options = isset($existing_options) ? $existing_options : get_option('ahmaipsu_settings', array());
+    $allowed_summary_types = ['summary', 'key_takeaways'];
     if (isset($input['ahmaipsu_summary_type'])) {
-        $allowed_summary_types = ['summary', 'key_takeaways'];
         $summary_type = sanitize_text_field($input['ahmaipsu_summary_type']);
-        if (in_array($summary_type, $allowed_summary_types)) {
-            $sanitized['ahmaipsu_summary_type'] = $summary_type;
-        } else {
-            $sanitized['ahmaipsu_summary_type'] = 'summary'; // fallback to summary
+        if (!in_array($summary_type, $allowed_summary_types, true)) {
+            $summary_type = 'summary';
+        }
+    } else {
+        $summary_type = $existing_options['ahmaipsu_summary_type'] ?? $existing_options['ahmaipsu_content_type'] ?? 'summary';
+        if (!in_array($summary_type, $allowed_summary_types, true)) {
+            $summary_type = 'summary';
         }
     }
+    $sanitized['ahmaipsu_summary_type'] = $summary_type;
+    $sanitized['ahmaipsu_content_type'] = $summary_type;
     
     // Sanitize custom summary title
     if (isset($input['ahmaipsu_custom_summary_title'])) {
@@ -744,7 +750,7 @@ function ahmaipsu_disclaimer_render() {
 
 function ahmaipsu_summary_type_render() {
     $options = get_option('ahmaipsu_settings');
-    $summary_type = $options['ahmaipsu_summary_type'] ?? 'summary';
+    $summary_type = $options['ahmaipsu_summary_type'] ?? $options['ahmaipsu_content_type'] ?? 'summary';
     ?>
     <fieldset>
         <legend class="screen-reader-text"><?php esc_html_e('Summary Type', 'ahm-ai-post-summary'); ?></legend>
@@ -753,7 +759,7 @@ function ahmaipsu_summary_type_render() {
             <?php esc_html_e('Summary', 'ahm-ai-post-summary'); ?> - <?php esc_html_e('Generate a concise overview of the post content.', 'ahm-ai-post-summary'); ?>
         </label>
         <label style="display: block; margin-bottom: 8px;">
-            <input type="radio" name="ahmaipsu_settings[ahmaipsu_summary_type]" value="key_takeaways" <?php checked($content_type, 'key_takeaways'); ?> />
+            <input type="radio" name="ahmaipsu_settings[ahmaipsu_summary_type]" value="key_takeaways" <?php checked($summary_type, 'key_takeaways'); ?> />
             <?php esc_html_e('Key Takeaways', 'ahm-ai-post-summary'); ?> - <?php esc_html_e('Extract and list the main insights and actionable points as bullet points.', 'ahm-ai-post-summary'); ?>
         </label>
     </fieldset>
