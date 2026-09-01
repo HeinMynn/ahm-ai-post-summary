@@ -4,7 +4,7 @@ Tags: ai, summary, seo, automation, content
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,6 +18,7 @@ Automatically generate AI-powered summaries for your blog posts using Google Gem
 
 * **Automatic Summary Generation**: Summaries are created automatically when posts are published or updated
 * **Multiple AI Providers**: Choose between Google Gemini (recommended) or OpenAI ChatGPT
+* **Excerpt and SEO meta**: Optionally fill the native excerpt, Yoast, and Rank Math from the same generation
 * **Model Picker**: Select a model from the provider after validating your API key
 * **API Key Validation**: Real-time validation ensures your API keys work before you save settings
 * **Instant Summary Regeneration**: Regenerate summaries instantly from the post editor
@@ -196,7 +197,7 @@ Yes, the plugin is designed to work with any WordPress theme. Summaries are adde
 
 = Can I place summaries manually? =
 
-Yes, you can use the [ai_post_summary] shortcode to place summaries anywhere in your content.
+Yes. Use the [ahm_ai_post_summary] shortcode to place summaries anywhere in your content. [ahmaipsu] still works as an alias.
 
 = What happens if I deactivate the plugin? =
 
@@ -204,19 +205,28 @@ Your summaries are preserved in the database. If you reactivate the plugin, ever
 
 = Is there a word/character limit? =
 
-You can set your preferred character count in the settings. The default is 200 characters, but you can adjust this as needed.
+You can set your preferred character count in the settings (50-1500 characters). The default is 200.
 
 == Screenshots ==
 
-1. Plugin settings page with API provider selection and key configuration
-2. Post editor meta box showing summary controls
-3. Frontend display of AI-generated summary
-4. Summary generation in action with real-time updates
+1. API Key tab: choose Google Gemini or ChatGPT, paste a key, and pick a model
+2. Summary tab: type, length, and Also write to excerpt, Yoast, and Rank Math
+3. Post editor: enable, pick Summary or Key Takeaways, and regenerate
+4. Frontend summary box (Classic) at the top of the post
 
 == Changelog ==
 
+= 1.3.0 =
+* Added: Write the generated summary to the native WordPress excerpt (archives, RSS, search)
+* Added: Fill Yoast and Rank Math meta descriptions when those plugins are present (no hard dependency)
+* Added: Per-destination on/off, update-on-regenerate, and never-overwrite-human-text (opt-in) settings
+* Existing hand-written excerpts and SEO meta are left alone unless overwrite is enabled
+* Added: Skip auto-generate on save when the post body and model/provider/length/type/language have not changed (manual Regenerate always calls the API)
+* Added: Canonical [ahm_ai_post_summary] shortcode; [ahmaipsu] remains as an alias
+
 = 1.2.1 =
 * Fixed: Model picker now shows on the API Key tab (was registered but not rendered)
+
 
 = 1.2.0 =
 * Added: Model picker after API key validation (Gemini generateContent models, OpenAI chat models)

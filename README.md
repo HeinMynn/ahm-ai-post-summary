@@ -17,6 +17,7 @@
 - **Character Count Control**: Set the desired length of generated summaries (50-1500 characters)
 - **Global Toggle**: Enable or disable summary generation site-wide
 - **API Provider Selection**: Choose between Gemini (preferred) and ChatGPT
+- **Excerpt and SEO meta**: Optionally fill the native excerpt, Yoast, and Rank Math from the same generation
 - **Model Picker**: After validating the API key, choose a model from that provider
 - **Test Summary Generation**: Built-in testing tool in admin settings
 
@@ -30,7 +31,7 @@
 ### 🌐 Frontend Display
 
 - **Automatic Display**: Summaries appear automatically at the top of posts (when enabled)
-- **Shortcode Support**: Use `[ai_post_summary]` shortcode for manual placement
+- **Shortcode Support**: Use `[ahm_ai_post_summary]` for manual placement (`[ahmaipsu]` still works)
 - **Responsive Design**: Clean, mobile-friendly summary display box
 
 ## 🚀 Quick Start
@@ -78,7 +79,7 @@ wp plugin activate ahm-ai-post-summary
 
 ### Manual Control
 
-- Use `[ai_post_summary]` shortcode for custom placement
+- Use `[ahm_ai_post_summary]` for custom placement (`[ahmaipsu]` still works)
 - Regenerate summaries anytime from post editor
 - Disable per post or globally
 

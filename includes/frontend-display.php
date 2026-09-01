@@ -41,6 +41,11 @@ function ahmaipsu_display_summary($content) {
     if (!$global_enabled || !$post_enabled || empty($summary)) {
         return $content;
     }
+
+    // Manual shortcode placement: do not also prepend.
+    if (has_shortcode($content, 'ahm_ai_post_summary') || has_shortcode($content, 'ahmaipsu')) {
+        return $content;
+    }
     
     // Get disclaimer text and theme from settings
     $disclaimer = isset($options['ahmaipsu_disclaimer']) ? 
@@ -158,7 +163,8 @@ function ahmaipsu_frontend_styles() {
     );
 }
 
-// Shortcode for manual placement
+// Canonical shortcode plus backward-compat alias. Do not register [ai_post_summary].
+add_shortcode('ahm_ai_post_summary', 'ahmaipsu_shortcode');
 add_shortcode('ahmaipsu', 'ahmaipsu_shortcode');
 
 function ahmaipsu_shortcode($atts) {

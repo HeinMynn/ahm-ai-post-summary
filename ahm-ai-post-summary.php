@@ -3,7 +3,7 @@
  * Plugin Name:       AHM AI Post Summary
  * Plugin URI:        https://wordpress.org/plugins/ahm-ai-post-summary/
  * Description:       Automatically generates AI-powered summaries for your blog posts using Google Gemini or OpenAI ChatGPT. Display summaries at the top of posts to improve reader engagement and SEO.
- * Version: 1.2.1
+ * Version: 1.3.0
  * Requires at least: 5.6
  * Requires PHP:      7.4
  * Author:            Aung Hein Mynn
@@ -27,7 +27,7 @@
  * along with AHM AI Post Summary. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
  *
  * @package AIPostSummary
- * @version 1.2.1
+ * @version 1.3.0
  * @author  Aung Hein Mynn
  * @license GPL-2.0-or-later
  */
@@ -38,7 +38,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('AHMAIPSU_VERSION', '1.2.1');
+define('AHMAIPSU_VERSION', '1.3.0');
 define('AHMAIPSU_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AHMAIPSU_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('AHMAIPSU_PLUGIN_FILE', __FILE__);
@@ -47,6 +47,8 @@ define('AHMAIPSU_PLUGIN_FILE', __FILE__);
 require_once AHMAIPSU_PLUGIN_DIR . 'includes/admin-settings.php';
 require_once AHMAIPSU_PLUGIN_DIR . 'includes/post-editor.php';
 require_once AHMAIPSU_PLUGIN_DIR . 'includes/api-handler.php';
+require_once AHMAIPSU_PLUGIN_DIR . 'includes/generate-fingerprint.php';
+require_once AHMAIPSU_PLUGIN_DIR . 'includes/destination-sync.php';
 require_once AHMAIPSU_PLUGIN_DIR . 'includes/frontend-display.php';
 
 // Activation hook
@@ -66,7 +68,12 @@ function ahmaipsu_activate() {
         'ahmaipsu_theme' => 'classic',
         'ahmaipsu_content_type' => 'summary',
         'ahmaipsu_custom_summary_title' => '',
-        'ahmaipsu_custom_key_takeaways_title' => ''
+        'ahmaipsu_custom_key_takeaways_title' => '',
+        'ahmaipsu_sync_excerpt' => 1,
+        'ahmaipsu_sync_yoast' => 1,
+        'ahmaipsu_sync_rankmath' => 1,
+        'ahmaipsu_sync_on_regenerate' => 1,
+        'ahmaipsu_sync_overwrite' => 0
     );
     
     add_option('ahmaipsu_settings', $default_options);
@@ -91,4 +98,10 @@ function ahmaipsu_uninstall() {
     delete_post_meta_by_key('_ahmaipsu_enabled');
     delete_post_meta_by_key('_ahmaipsu_content');
     delete_post_meta_by_key('_ahmaipsu_regenerate_flag');
+    delete_post_meta_by_key('_ahmaipsu_content_type');
+    delete_post_meta_by_key('_ahmaipsu_wrote_excerpt');
+    delete_post_meta_by_key('_ahmaipsu_wrote_yoast');
+    delete_post_meta_by_key('_ahmaipsu_wrote_rankmath');
+    delete_post_meta_by_key('_ahmaipsu_generate_fingerprint');
+    // Keep post_excerpt, Yoast, and Rank Math values.
 }

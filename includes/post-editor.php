@@ -256,23 +256,40 @@ function ahmaipsu_auto_generate($post_id) {
     // Check if we should regenerate or if no summary exists
     $existing_summary = get_post_meta($post_id, '_ahmaipsu_content', true);
     $should_regenerate = get_post_meta($post_id, '_ahmaipsu_regenerate_flag', true);
-    
-    // Only generate if no summary exists OR regeneration is requested
-    if (!empty($existing_summary) && !$should_regenerate) return;
-    
+
     // Get post content
     $post = get_post($post_id);
     if (!$post || empty($post->post_content)) return;
-    
-    // Get options for character count setting
+
     $options = get_option('ahmaipsu_settings');
     $char_count = $options['ahmaipsu_char_count'] ?? 200;
     $content_type = get_post_meta($post_id, '_ahmaipsu_content_type', true) ?: 'summary';
+
+    // Manual metabox regenerate always hits the API.
+    // Auto save_post skips when body + model/provider/char count/content type/language match the last success.
+    // Empty summary always generates. Failed generate does not update the fingerprint.
+    if (!$should_regenerate) {
+        if (!empty($existing_summary)) {
+            $current_context = ahmaipsu_generate_context($post, $content_type);
+            $stored_context = ahmaipsu_get_generate_fingerprint($post_id);
+            if (empty($stored_context)) {
+                // Existing summary from before this feature: seed, do not burn an API call.
+                ahmaipsu_store_generate_fingerprint($post_id, $current_context);
+                return;
+            }
+            if (ahmaipsu_generate_context_matches($stored_context, $current_context)) {
+                return;
+            }
+        }
+    }
+
     $summary = ahmaipsu_API_Handler::generate_summary($post->post_content, $char_count, $content_type);
     
     // Save the summary if generation was successful
     if (!is_wp_error($summary)) {
         update_post_meta($post_id, '_ahmaipsu_content', $summary);
+        ahmaipsu_sync_destinations($post_id, $summary, (bool) $should_regenerate);
+        ahmaipsu_store_generate_fingerprint($post_id, ahmaipsu_generate_context($post, $content_type));
         // Clear the regeneration flag
         delete_post_meta($post_id, '_ahmaipsu_regenerate_flag');
         
@@ -373,8 +390,10 @@ function ahmaipsu_ajax_regenerate_instantly() {
             wp_send_json_error('Failed to generate summary: ' . $summary->get_error_message());
         }
         
-        // Save the new summary
+        // Save the new summary. Manual regenerate always hits the API; store fingerprint only on success.
         update_post_meta($post_id, '_ahmaipsu_content', $summary);
+        ahmaipsu_sync_destinations($post_id, $summary, true);
+        ahmaipsu_store_generate_fingerprint($post_id, ahmaipsu_generate_context($post, $content_type));
         
         wp_send_json_success([
             'summary' => $summary,

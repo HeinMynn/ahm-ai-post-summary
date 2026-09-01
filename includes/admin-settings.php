@@ -354,6 +354,13 @@ function ahmaipsu_sanitize_settings($input) {
         $sanitized['ahmaipsu_custom_key_takeaways_title'] = sanitize_text_field($input['ahmaipsu_custom_key_takeaways_title']);
     }
     
+    // Destination sync checkboxes (unchecked = 0)
+    $sanitized['ahmaipsu_sync_excerpt'] = isset($input['ahmaipsu_sync_excerpt']) ? 1 : 0;
+    $sanitized['ahmaipsu_sync_yoast'] = isset($input['ahmaipsu_sync_yoast']) ? 1 : 0;
+    $sanitized['ahmaipsu_sync_rankmath'] = isset($input['ahmaipsu_sync_rankmath']) ? 1 : 0;
+    $sanitized['ahmaipsu_sync_on_regenerate'] = isset($input['ahmaipsu_sync_on_regenerate']) ? 1 : 0;
+    $sanitized['ahmaipsu_sync_overwrite'] = isset($input['ahmaipsu_sync_overwrite']) ? 1 : 0;
+
     // Sanitize supported post types
     if (isset($input['ahmaipsu_post_types']) && is_array($input['ahmaipsu_post_types'])) {
         $allowed_post_types = ['post', 'page'];
@@ -456,6 +463,14 @@ function ahmaipsu_settings_init() {
         'ahmaipsu_post_types',
         __('Supported Post Types', 'ahm-ai-post-summary'),
         'ahmaipsu_post_types_render',
+        'ahmaipsu',
+        'ahmaipsu_summary_section'
+    );
+
+    add_settings_field(
+        'ahmaipsu_sync_destinations',
+        __('Also write to', 'ahm-ai-post-summary'),
+        'ahmaipsu_sync_destinations_render',
         'ahmaipsu',
         'ahmaipsu_summary_section'
     );
@@ -634,6 +649,46 @@ function ahmaipsu_global_enable_render() {
     } else {
         echo '<p class="description">When enabled, AI summaries will be automatically generated for all new posts (individual posts can still opt out).</p>';
     }
+}
+
+
+function ahmaipsu_sync_destinations_render() {
+    $excerpt = ahmaipsu_setting_flag('ahmaipsu_sync_excerpt', true);
+    $yoast = ahmaipsu_setting_flag('ahmaipsu_sync_yoast', true);
+    $rankmath = ahmaipsu_setting_flag('ahmaipsu_sync_rankmath', true);
+    $on_regen = ahmaipsu_setting_flag('ahmaipsu_sync_on_regenerate', true);
+    $overwrite = ahmaipsu_setting_flag('ahmaipsu_sync_overwrite', false);
+    $yoast_active = ahmaipsu_is_yoast_active();
+    $rankmath_active = ahmaipsu_is_rankmath_active();
+
+    echo '<fieldset>';
+    echo '<legend class="screen-reader-text">' . esc_html__('Also write to', 'ahm-ai-post-summary') . '</legend>';
+
+    echo '<label style="display:block;margin-bottom:8px;"><input type="checkbox" name="ahmaipsu_settings[ahmaipsu_sync_excerpt]" value="1" ' . checked($excerpt, true, false) . ' /> ';
+    echo esc_html__('WordPress excerpt (archives, RSS, search)', 'ahm-ai-post-summary') . '</label>';
+
+    echo '<label style="display:block;margin-bottom:8px;"><input type="checkbox" name="ahmaipsu_settings[ahmaipsu_sync_yoast]" value="1" ' . checked($yoast, true, false) . ' /> ';
+    echo esc_html__('Yoast SEO meta description', 'ahm-ai-post-summary');
+    if (!$yoast_active) {
+        echo ' <span class="description">' . esc_html__('(Yoast not installed — writes are skipped)', 'ahm-ai-post-summary') . '</span>';
+    }
+    echo '</label>';
+
+    echo '<label style="display:block;margin-bottom:8px;"><input type="checkbox" name="ahmaipsu_settings[ahmaipsu_sync_rankmath]" value="1" ' . checked($rankmath, true, false) . ' /> ';
+    echo esc_html__('Rank Math meta description', 'ahm-ai-post-summary');
+    if (!$rankmath_active) {
+        echo ' <span class="description">' . esc_html__('(Rank Math not installed — writes are skipped)', 'ahm-ai-post-summary') . '</span>';
+    }
+    echo '</label>';
+
+    echo '<label style="display:block;margin-bottom:8px;"><input type="checkbox" name="ahmaipsu_settings[ahmaipsu_sync_on_regenerate]" value="1" ' . checked($on_regen, true, false) . ' /> ';
+    echo esc_html__('Update these fields when regenerating a summary we previously wrote', 'ahm-ai-post-summary') . '</label>';
+
+    echo '<label style="display:block;margin-bottom:8px;"><input type="checkbox" name="ahmaipsu_settings[ahmaipsu_sync_overwrite]" value="1" ' . checked($overwrite, true, false) . ' /> ';
+    echo esc_html__('Overwrite existing hand-written excerpt and SEO meta', 'ahm-ai-post-summary') . '</label>';
+
+    echo '<p class="description">' . esc_html__('Empty fields are filled from the same generation as the on-post summary (excerpt up to 300 characters, SEO meta up to 155). Hand-written text is never changed unless you enable overwrite. Admin test generation does not write to a post.', 'ahm-ai-post-summary') . '</p>';
+    echo '</fieldset>';
 }
 
 function ahmaipsu_post_types_render() {
@@ -881,6 +936,10 @@ function ahmaipsu_options_page() {
                     <tr>
                         <th scope="row"><?php esc_html_e('Supported Post Types', 'ahm-ai-post-summary'); ?></th>
                         <td><?php ahmaipsu_post_types_render(); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Also write to', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_sync_destinations_render(); ?></td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Default Language', 'ahm-ai-post-summary'); ?></th>
