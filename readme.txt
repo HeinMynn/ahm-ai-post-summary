@@ -4,7 +4,7 @@ Tags: ai, summary, seo, automation, content
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -214,6 +214,9 @@ You can set your preferred character count in the settings. The default is 200 c
 4. Summary generation in action with real-time updates
 
 == Changelog ==
+
+= 1.2.1 =
+* Fixed: Model picker now shows on the API Key tab (was registered but not rendered)
 
 = 1.2.0 =
 * Added: Model picker after API key validation (Gemini generateContent models, OpenAI chat models)

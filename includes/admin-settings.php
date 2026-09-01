@@ -922,6 +922,10 @@ function ahmaipsu_options_page() {
                         <th scope="row"><?php esc_html_e('API Key (Gemini/ChatGPT)', 'ahm-ai-post-summary'); ?></th>
                         <td><?php ahmaipsu_api_key_render(); ?></td>
                     </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Model', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_model_render(); ?></td>
+                    </tr>
                 </table>
             </div>
             
