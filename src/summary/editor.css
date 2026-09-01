@@ -1,0 +1,12 @@
+ .ahmaipsu-block-placeholder .ahmaipsu-summary-content {
+	color: #646970;
+}
+.ahmaipsu-block-helper {
+	margin: 8px 0 12px;
+	font-size: 13px;
+	line-height: 1.4;
+	color: #646970;
+}
+.ahmaipsu-block-placeholder .ahmaipsu-summary-disclaimer {
+	display: none;
+}

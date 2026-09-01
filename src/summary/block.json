@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "ahm-ai-post-summary/summary",
+  "version": "1.3.0",
+  "title": "AI Summary",
+  "category": "text",
+  "icon": "lightbulb",
+  "description": "Place this post’s AI summary or key takeaways.",
+  "keywords": [ "summary", "tldr", "takeaways", "ai" ],
+  "textdomain": "ahm-ai-post-summary",
+  "attributes": {
+    "showTitle": {
+      "type": "boolean",
+      "default": true
+    },
+    "showDisclaimer": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "supports": {
+    "html": false,
+    "multiple": true,
+    "align": false,
+    "reusable": true
+  },
+  "styles": [
+    { "name": "default", "label": "Default", "isDefault": true },
+    { "name": "minimal", "label": "Minimal" },
+    { "name": "card", "label": "Card" }
+  ],
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css"
+}

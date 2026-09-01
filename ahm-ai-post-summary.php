@@ -50,6 +50,7 @@ require_once AHMAIPSU_PLUGIN_DIR . 'includes/api-handler.php';
 require_once AHMAIPSU_PLUGIN_DIR . 'includes/generate-fingerprint.php';
 require_once AHMAIPSU_PLUGIN_DIR . 'includes/destination-sync.php';
 require_once AHMAIPSU_PLUGIN_DIR . 'includes/frontend-display.php';
+require_once AHMAIPSU_PLUGIN_DIR . 'includes/block-summary.php';
 
 // Activation hook
 register_activation_hook(__FILE__, 'ahmaipsu_activate');

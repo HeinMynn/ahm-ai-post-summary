@@ -42,8 +42,8 @@ function ahmaipsu_display_summary($content) {
         return $content;
     }
 
-    // Manual shortcode placement: do not also prepend.
-    if (has_shortcode($content, 'ahm_ai_post_summary') || has_shortcode($content, 'ahmaipsu')) {
+    // Manual block or shortcode placement: do not also prepend.
+    if (has_block('ahm-ai-post-summary/summary', $content) || has_shortcode($content, 'ahm_ai_post_summary') || has_shortcode($content, 'ahmaipsu')) {
         return $content;
     }
     
@@ -59,7 +59,7 @@ function ahmaipsu_display_summary($content) {
     return $summary_html . $content;
 }
 
-function ahmaipsu_render_summary($summary, $disclaimer, $theme = 'classic', $content_type = 'summary') {
+function ahmaipsu_render_summary($summary, $disclaimer, $theme = 'classic', $content_type = 'summary', $show_title = true, $show_disclaimer = true) {
     $options = get_option('ahmaipsu_settings', array());
     
     $theme_classes = array(
@@ -123,13 +123,16 @@ function ahmaipsu_render_summary($summary, $disclaimer, $theme = 'classic', $con
         $formatted_content = wp_kses_post($summary);
     }
     
-    return '<div class="ahmaipsu-summary-box ' . esc_attr($theme_class) . '">
-        <h4 class="ahmaipsu-summary-title">' . esc_html($theme_title) . '</h4>
-        <div class="ahmaipsu-summary-content">' . $formatted_content . '</div>
-        <div class="ahmaipsu-summary-disclaimer">
-            <small>ℹ️ ' . esc_html($disclaimer) . '</small>
-        </div>
-    </div>';
+    $html = '<div class="ahmaipsu-summary-box ' . esc_attr($theme_class) . '">';
+    if ($show_title) {
+        $html .= '<h4 class="ahmaipsu-summary-title">' . esc_html($theme_title) . '</h4>';
+    }
+    $html .= '<div class="ahmaipsu-summary-content">' . $formatted_content . '</div>';
+    if ($show_disclaimer) {
+        $html .= '<div class="ahmaipsu-summary-disclaimer"><small>ℹ️ ' . esc_html($disclaimer) . '</small></div>';
+    }
+    $html .= '</div>';
+    return $html;
 }
 
 // Add CSS for summary display

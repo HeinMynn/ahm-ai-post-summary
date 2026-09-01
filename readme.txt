@@ -223,6 +223,7 @@ You can set your preferred character count in the settings (50-1500 characters).
 * Existing hand-written excerpts and SEO meta are left alone unless overwrite is enabled
 * Added: Skip auto-generate on save when the post body and model/provider/length/type/language have not changed (manual Regenerate always calls the API)
 * Added: Canonical [ahm_ai_post_summary] shortcode; [ahmaipsu] remains as an alias
+* Added: Gutenberg AI Summary block to place the summary in the post (Default / Minimal / Card)
 
 = 1.2.1 =
 * Fixed: Model picker now shows on the API Key tab (was registered but not rendered)

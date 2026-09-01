@@ -4,10 +4,9 @@
   "description": "WordPress plugin to generate AI-powered summaries for blog posts",
   "main": "ahm-ai-post-summary.php",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "echo Building CSS files...",
-    "build": "npm run build:css",
-    "watch": "echo Watching for changes... (manual rebuild required)"
+    "build": "wp-scripts build --webpack-src-dir=src/summary --output-path=build/summary",
+    "start": "wp-scripts start --webpack-src-dir=src/summary --output-path=build/summary",
+    "build:css": "echo Building CSS files..."
   },
   "keywords": [
     "wordpress",
@@ -25,5 +24,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/aungheinmynn/ai-post-summary"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^30.26.0"
   }
 }

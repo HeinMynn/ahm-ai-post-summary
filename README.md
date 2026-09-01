@@ -31,6 +31,7 @@
 ### 🌐 Frontend Display
 
 - **Automatic Display**: Summaries appear automatically at the top of posts (when enabled)
+- **Gutenberg block**: Insert **AI Summary** (Text category) to place the box anywhere; Default inherits the site theme, plus Minimal and Card styles
 - **Shortcode Support**: Use `[ahm_ai_post_summary]` for manual placement (`[ahmaipsu]` still works)
 - **Responsive Design**: Clean, mobile-friendly summary display box
 
