@@ -4,7 +4,7 @@ Tags: ai, summary, seo, automation, content
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -146,8 +146,7 @@ This plugin relies on third-party AI services to generate summaries. Please be a
 2. Choose your preferred AI provider
 3. Add your API key (instructions provided)
 4. Configure your summary preferences under Summary tab.
-5. Enable summaries globally
-6. Edit any post to enable/disable summaries per post
+5. Automatic generation is on after activation; new posts generate a summary (you can still opt out per post)
 
 == Frequently Asked Questions ==
 
@@ -215,6 +214,9 @@ You can set your preferred character count in the settings (50-1500 characters).
 4. Frontend summary box (Classic) at the top of the post
 
 == Changelog ==
+
+= 1.3.5 =
+* Changed: Automatic summary generation is enabled by default on activation
 
 = 1.3.4 =
 * Fixed: Elegant theme keeps 16px between the left accent bar and the title, body, and disclaimer

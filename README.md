@@ -73,10 +73,10 @@ wp plugin activate ahm-ai-post-summary
 
 ### Automatic Generation
 
-1. Enable global summaries in settings
-2. Create/edit a post
-3. Check "Enable summary for this post"
-4. Publish - summary generates automatically!
+1. Activate the plugin and add an API key
+2. Create/edit a post — summaries are enabled for new posts by default
+3. Publish — the summary generates automatically
+4. Uncheck the per-post toggle to opt out
 
 ### Manual Control
 
