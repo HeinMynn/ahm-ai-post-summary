@@ -78,6 +78,25 @@ wp plugin activate ahm-ai-post-summary
 3. Publish — the summary generates automatically
 4. Uncheck the per-post toggle to opt out
 
+### REST API / XML-RPC (including AI agents)
+
+With global auto-generation on, posts created through REST or XML-RPC get a summary unless the agent sends an explicit off.
+
+To skip a post, set meta `_ahmaipsu_enabled` to `0`:
+
+```json
+{
+  "title": "My post",
+  "content": "…",
+  "status": "publish",
+  "meta": {
+    "_ahmaipsu_enabled": "0"
+  }
+}
+```
+
+XML-RPC: custom field `_ahmaipsu_enabled` = `0`. Omit the field (or send `1`) to generate. An empty string is not an off.
+
 ### Manual Control
 
 - Use `[ahm_ai_post_summary]` for custom placement (`[ahmaipsu]` still works)

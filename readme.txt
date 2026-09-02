@@ -4,7 +4,7 @@ Tags: ai, summary, seo, automation, content
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -188,7 +188,19 @@ No, summaries are generated in the background when posts are saved. Visitors see
 
 = Can I disable summaries for specific posts? =
 
-Yes, each post has a checkbox in the editor to enable/disable summaries individually.
+Yes. In the post editor, uncheck "Enable automatic summary generation for this post."
+
+If you publish through the REST API or XML-RPC (including AI agents), send the post meta `_ahmaipsu_enabled` with value `0`. That explicit off wins even when global auto-generation and "Generate for posts created via REST or XML-RPC" are on. Omit the field (or send `1`) to generate. Do not send an empty string if you mean off.
+
+REST example:
+
+`{ "title": "My post", "content": "…", "status": "publish", "meta": { "_ahmaipsu_enabled": "0" } }`
+
+XML-RPC: add a custom field with key `_ahmaipsu_enabled` and value `0`.
+
+= Do posts created via REST or XML-RPC get summaries? =
+
+Yes, if global auto-generation is on and "Generate for posts created via REST or XML-RPC" is on (Summary tab). Gutenberg editor saves already send the editor flag, so they are not treated as agent publishes. Per-post off still wins if the agent sent `_ahmaipsu_enabled` = `0`.
 
 = Does it work with all themes? =
 
@@ -214,6 +226,9 @@ You can set your preferred character count in the settings (50-1500 characters).
 4. Frontend summary box (Classic) at the top of the post
 
 == Changelog ==
+
+= 1.3.7 =
+* Added: FAQ for disabling summaries per post from REST or XML-RPC (including AI agents)
 
 = 1.3.6 =
 * Added: Option to auto-generate summaries for posts created via REST or XML-RPC
