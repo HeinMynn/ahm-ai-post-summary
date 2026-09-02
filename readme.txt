@@ -4,7 +4,7 @@ Tags: ai, summary, seo, automation, content
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -215,6 +215,9 @@ You can set your preferred character count in the settings (50-1500 characters).
 4. Frontend summary box (Classic) at the top of the post
 
 == Changelog ==
+
+= 1.3.4 =
+* Fixed: Elegant theme keeps 16px between the left accent bar and the title, body, and disclaimer
 
 = 1.3.3 =
 * Changed: Summary themes are plugin-owned (isolated type and tokens) so host themes cannot restyle the box
