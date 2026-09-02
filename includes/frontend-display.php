@@ -102,20 +102,12 @@ function ahmaipsu_render_summary($summary, $disclaimer, $theme = 'classic', $con
     
     // Format content based on type
     if ($content_type === 'key_takeaways') {
-        // Convert to bulleted list if not already formatted
         $formatted_content = wp_kses_post($summary);
         if (strpos($formatted_content, '<ul>') === false && strpos($formatted_content, '<li>') === false) {
-            // Assume AI returns newline-separated items
-            $takeaways = explode("\n", $formatted_content);
+            $takeaways = ahmaipsu_API_Handler::parse_takeaways($summary);
             $formatted_content = '<ul>';
             foreach ($takeaways as $takeaway) {
-                $takeaway = trim($takeaway);
-                if (!empty($takeaway) && !preg_match('/^[-•*]/', $takeaway)) {
-                    $takeaway = '• ' . $takeaway;
-                }
-                if (!empty($takeaway)) {
-                    $formatted_content .= '<li>' . esc_html(ltrim($takeaway, '-•* ')) . '</li>';
-                }
+                $formatted_content .= '<li>' . esc_html($takeaway) . '</li>';
             }
             $formatted_content .= '</ul>';
         }

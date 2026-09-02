@@ -59,18 +59,44 @@ function titleFor(theme, contentType, customSummary, customTakeaways) {
 	return titles[theme] || titles.classic;
 }
 
+function takeawayItems(summary) {
+	const text = String(summary || '').replace(/\r\n?/g, '\n');
+	const items = [];
+	text.split(/\n+/).forEach((line) => {
+		line = line.trim();
+		if (!line) {
+			return;
+		}
+		let parts = line.split(/\s+(?=[-•*]\s+)/);
+		if (parts.length === 1) {
+			const numbered = line.split(/\s+(?=\d+[\.)]\s+)/);
+			if (numbered.length > 1) {
+				parts = numbered;
+			}
+		}
+		parts.forEach((part) => {
+			part = part
+				.trim()
+				.replace(/^[-•*]+\s+/, '')
+				.replace(/^\d+[\.)]\s+/, '')
+				.trim();
+			if (part) {
+				items.push(part);
+			}
+		});
+	});
+	return items;
+}
+
 function formatBody(summary, contentType) {
 	if (contentType !== 'key_takeaways') {
 		return summary;
 	}
-	const lines = String(summary)
-		.split('\n')
-		.map((line) => line.trim())
-		.filter(Boolean);
+	const items = takeawayItems(summary);
 	return (
 		<ul>
-			{lines.map((line, i) => (
-				<li key={i}>{line.replace(/^[-•*]\s*/, '')}</li>
+			{items.map((line, i) => (
+				<li key={i}>{line}</li>
 			))}
 		</ul>
 	);

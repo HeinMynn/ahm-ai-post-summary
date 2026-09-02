@@ -8,8 +8,21 @@
 
   // Wait for DOM to be ready
   $(document).ready(function () {
+    if (typeof ahmaipsu_editor_vars === "undefined") {
+      return;
+    }
     var postId = ahmaipsu_editor_vars.post_id;
     var checkingForUpdate = false;
+
+    // Gutenberg REST save uses the editor meta store, not the classic metabox POST.
+    function syncMetaToEditor(meta) {
+      if (!window.wp || !wp.data || !wp.data.dispatch) {
+        return;
+      }
+      try {
+        wp.data.dispatch("core/editor").editPost({ meta: meta });
+      } catch (err) {}
+    }
 
     // Handle regenerate button click
     $(document).on("click", "#ahmaipsu-regenerate-btn", function (e) {
@@ -39,6 +52,7 @@
             $("#gpt-summary-text").text(response.data.summary);
             $("#gpt-summary-preview").show();
             $("#gpt-summary-placeholder").hide();
+            syncMetaToEditor({ _ahmaipsu_content: response.data.summary });
 
             // Show success status
             $status
@@ -278,16 +292,7 @@
         }, 30000);
       }
 
-    // Gutenberg REST save uses the editor meta store, not the classic metabox POST.
     // Keep Content Type (and enable) in sync so Key Takeaways is not overwritten.
-    function syncMetaToEditor(meta) {
-      if (!window.wp || !wp.data || !wp.data.dispatch) {
-        return;
-      }
-      try {
-        wp.data.dispatch("core/editor").editPost({ meta: meta });
-      } catch (err) {}
-    }
     $(document).on("change", 'input[name="ahmaipsu_content_type"]', function () {
       syncMetaToEditor({ _ahmaipsu_content_type: $(this).val() });
     });

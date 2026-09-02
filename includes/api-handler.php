@@ -650,6 +650,124 @@ class ahmaipsu_API_Handler {
         }
     }
 
+
+    /**
+     * Prompt for Key Takeaways: 3–5 distinct bullets, character count is a target.
+     *
+     * @param int    $char_count Target character count for the whole list.
+     * @param string $content    Post content.
+     * @return string
+     */
+    private static function takeaways_user_prompt($char_count, $content) {
+        return "Extract 3 to 5 key takeaways from the following content.\n" .
+            "Return a markdown list only: one short distinct point per line, each starting with \"- \".\n" .
+            "Do not write a paragraph. Do not put more than one point on the same line. Do not add introductory or closing text.\n" .
+            "Aim for about {$char_count} characters across the whole list. Prefer 3–5 complete short bullets over hitting that count exactly.\n" .
+            "Start directly with the first \"- \".\n\n" .
+            "Content to analyze:\n" . $content;
+    }
+
+    /**
+     * Split takeaways text into distinct items (newlines, markdown, or inline bullets).
+     *
+     * @param string $text Raw model output.
+     * @return string[]
+     */
+    public static function parse_takeaways($text) {
+        $text = is_string($text) ? $text : '';
+        $text = str_replace(array("\r\n", "\r"), "\n", $text);
+        if (function_exists('wp_strip_all_tags')) {
+            $text = html_entity_decode(wp_strip_all_tags($text), ENT_QUOTES, 'UTF-8');
+        }
+        $lines = preg_split("/\n+/", $text);
+        $items = array();
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $parts = preg_split('/\s+(?=[-•*]\s+)/u', $line);
+            if (count($parts) === 1) {
+                $numbered = preg_split('/\s+(?=\d+[\.\)]\s+)/u', $line);
+                if (count($numbered) > 1) {
+                    $parts = $numbered;
+                }
+            }
+            foreach ($parts as $part) {
+                $part = trim($part);
+                $part = preg_replace('/^[-•*]+\s+/u', '', $part);
+                $part = preg_replace('/^\d+[\.\)]\s+/', '', $part);
+                $part = trim($part);
+                if ($part !== '') {
+                    $items[] = $part;
+                }
+            }
+        }
+        return $items;
+    }
+
+    /**
+     * Keep complete takeaway items under the character target. Never slice mid-item.
+     *
+     * @param string $text       Raw takeaways.
+     * @param int    $char_count Target length.
+     * @return string
+     */
+    private static function trim_takeaways_list($text, $char_count) {
+        $items = self::parse_takeaways($text);
+        if (empty($items)) {
+            return $text;
+        }
+        $kept = array();
+        $len = 0;
+        foreach ($items as $item) {
+            $line = '- ' . $item;
+            $add = ($len === 0) ? mb_strlen($line, 'UTF-8') : $len + 1 + mb_strlen($line, 'UTF-8');
+            if ($add > $char_count) {
+                if (empty($kept)) {
+                    $kept[] = $line;
+                }
+                break;
+            }
+            $kept[] = $line;
+            $len = $add;
+        }
+        return implode("\n", $kept);
+    }
+
+    /**
+     * Apply the character target. Summaries cut at a word boundary; takeaways drop whole trailing items.
+     *
+     * @param string $text
+     * @param int    $char_count
+     * @param string $content_type
+     * @return string
+     */
+    private static function apply_char_limit($text, $char_count, $content_type) {
+        if (mb_strlen($text, 'UTF-8') <= $char_count) {
+            if ($content_type === 'key_takeaways') {
+                $items = self::parse_takeaways($text);
+                if (!empty($items)) {
+                    $prefixed = array();
+                    foreach ($items as $item) {
+                        $prefixed[] = '- ' . $item;
+                    }
+                    return implode("\n", $prefixed);
+                }
+            }
+            return $text;
+        }
+        if ($content_type === 'key_takeaways') {
+            return self::trim_takeaways_list($text, $char_count);
+        }
+        $text = mb_substr($text, 0, $char_count, 'UTF-8');
+        $last_space = mb_strrpos($text, ' ', 0, 'UTF-8');
+        if ($last_space !== false) {
+            $text = mb_substr($text, 0, $last_space, 'UTF-8');
+        }
+        return $text;
+    }
+
     /**
      * Generate summary using selected AI provider
      *
@@ -696,12 +814,7 @@ class ahmaipsu_API_Handler {
         $language_instruction = self::detect_language_instruction($content);
 
         if ($content_type === 'key_takeaways') {
-            $prompt = $language_instruction . "\n\n" .
-                     "Extract the key takeaways from the following content and list them as bullet points only. " .
-                     "Do not add any introductory text like 'Here are the key takeaways' or similar. " .
-                     "Limit to " . $char_count . " characters total. Focus on the most important insights, " .
-                     "actionable points, and main conclusions. Start directly with the bullet points.\n\n" .
-                     "Content to analyze:\n" . $content;
+            $prompt = $language_instruction . "\n\n" . self::takeaways_user_prompt($char_count, $content);
         } else {
             $prompt = $language_instruction . "\n\n" .
                      "Please provide a concise summary of the following content in " . $char_count . " characters or less. " .
@@ -768,18 +881,7 @@ class ahmaipsu_API_Handler {
             }
 
             $summary = trim($data['candidates'][0]['content']['parts'][0]['text']);
-
-            // Ensure the summary doesn't exceed the character limit (use multi-byte functions for non-English support)
-            if (mb_strlen($summary, 'UTF-8') > $char_count) {
-                $summary = mb_substr($summary, 0, $char_count, 'UTF-8');
-                // Try to cut at a word boundary (multi-byte safe)
-                $last_space = mb_strrpos($summary, ' ', 0, 'UTF-8');
-                if ($last_space !== false) {
-                    $summary = mb_substr($summary, 0, $last_space, 'UTF-8');
-                }
-            }
-
-            return $summary;
+            return self::apply_char_limit($summary, $char_count, $content_type);
         }
 
         // If all endpoints failed, return the last error
@@ -794,7 +896,7 @@ class ahmaipsu_API_Handler {
         $language_instruction = self::detect_language_instruction($content);
 
         if ($content_type === 'key_takeaways') {
-            $user_content = "Extract the key takeaways from the following content and list them as bullet points only. Do not add any introductory text like 'Here are the key takeaways' or similar. Limit to {$char_count} characters total. Focus on the most important insights, actionable points, and main conclusions. Start directly with the bullet points.\n\nContent to analyze:\n" . $content;
+            $user_content = self::takeaways_user_prompt($char_count, $content);
         } else {
             $user_content = "Please provide a concise summary of the following content in exactly {$char_count} characters or less. Focus on the main points and key information. Make it engaging and readable.\n\nContent to summarize:\n" . $content;
         }
@@ -845,18 +947,7 @@ class ahmaipsu_API_Handler {
 
         if (isset($data['choices'][0]['message']['content'])) {
             $summary = trim($data['choices'][0]['message']['content']);
-
-            // Ensure the summary doesn't exceed the character limit (use multi-byte functions for non-English support)
-            if (mb_strlen($summary, 'UTF-8') > $char_count) {
-                $summary = mb_substr($summary, 0, $char_count, 'UTF-8');
-                // Try to cut at a word boundary (multi-byte safe)
-                $last_space = mb_strrpos($summary, ' ', 0, 'UTF-8');
-                if ($last_space !== false) {
-                    $summary = mb_substr($summary, 0, $last_space, 'UTF-8');
-                }
-            }
-
-            return $summary;
+            return self::apply_char_limit($summary, $char_count, $content_type);
         }
 
         return new WP_Error('chatgpt_response_error', 'Unexpected response format from ChatGPT API: ' . $response_body);

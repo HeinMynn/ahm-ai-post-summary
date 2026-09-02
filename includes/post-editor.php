@@ -151,16 +151,15 @@ function ahmaipsu_enqueue_admin_scripts($hook) {
         true
     );
     
-    // Localize script with data
+    // Localize even when $post is late; missing vars make the regenerate click a no-op.
     global $post;
-    if ($post && in_array($post->post_type, $supported_post_types, true)) {
-        wp_localize_script('ahmaipsu-post-editor', 'ahmaipsu_editor_vars', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'post_id' => $post->ID,
-            'nonce' => wp_create_nonce('ahmaipsu_check_' . $post->ID),
-            'regenerate_nonce' => wp_create_nonce('ahmaipsu_regenerate_' . $post->ID),
-        ));
-    }
+    $post_id = ($post && isset($post->ID)) ? (int) $post->ID : 0;
+    wp_localize_script('ahmaipsu-post-editor', 'ahmaipsu_editor_vars', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'post_id' => $post_id,
+        'nonce' => wp_create_nonce('ahmaipsu_check_' . $post_id),
+        'regenerate_nonce' => wp_create_nonce('ahmaipsu_regenerate_' . $post_id),
+    ));
 }
 
 function ahmaipsu_add_meta_box() {
