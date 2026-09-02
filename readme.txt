@@ -4,7 +4,7 @@ Tags: ai, summary, seo, automation, content
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.5
+Stable tag: 1.3.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -214,6 +214,9 @@ You can set your preferred character count in the settings (50-1500 characters).
 4. Frontend summary box (Classic) at the top of the post
 
 == Changelog ==
+
+= 1.3.6 =
+* Added: Option to auto-generate summaries for posts created via REST or XML-RPC
 
 = 1.3.5 =
 * Changed: Automatic summary generation is enabled by default on activation

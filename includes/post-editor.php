@@ -110,6 +110,7 @@ add_action('save_post', 'ahmaipsu_save_post_meta', 10); // Save meta first
 add_action('publish_post', 'ahmaipsu_auto_generate', 20); // Run after meta is saved
 add_action('save_post', 'ahmaipsu_auto_generate', 25); // Run after save_post_meta with higher priority
 add_action('transition_post_status', 'ahmaipsu_on_publish', 30, 3); // Handle status transitions last
+add_action('rest_api_init', 'ahmaipsu_register_rest_autogen', 20);
 add_action('wp_ajax_ahmaipsu_check_update', 'ahmaipsu_ajax_check_update');
 add_action('admin_enqueue_scripts', 'ahmaipsu_enqueue_admin_scripts');
 
@@ -202,6 +203,99 @@ function ahmaipsu_save_post_meta($post_id) {
     }
 }
 
+function ahmaipsu_register_rest_autogen() {
+    $options = get_option('ahmaipsu_settings', array());
+    $types = isset($options['ahmaipsu_post_types']) ? $options['ahmaipsu_post_types'] : array('post');
+    foreach ($types as $type) {
+        add_action('rest_after_insert_' . $type, 'ahmaipsu_rest_after_insert', 20, 3);
+    }
+}
+
+function ahmaipsu_rest_after_insert($post, $request, $creating) {
+    unset($creating);
+    if (!$post instanceof WP_Post) {
+        return;
+    }
+    $GLOBALS['ahmaipsu_from_rest_after_insert'] = true;
+    $GLOBALS['ahmaipsu_rest_request'] = $request;
+    ahmaipsu_auto_generate($post->ID);
+    unset($GLOBALS['ahmaipsu_from_rest_after_insert'], $GLOBALS['ahmaipsu_rest_request']);
+}
+
+/**
+ * @return bool|null true on, false explicit off, null unset
+ */
+function ahmaipsu_explicit_enabled_state($post_id) {
+    $rows = get_post_meta($post_id, '_ahmaipsu_enabled', false);
+    if (!is_array($rows) || count($rows) === 0) {
+        return null;
+    }
+    $val = $rows[0];
+    if ($val === '' || $val === null) {
+        return null;
+    }
+    if ($val === '0' || $val === 0 || $val === 'false') {
+        return false;
+    }
+    if ($val === '1' || $val === 1 || $val === true || $val === 'true') {
+        return true;
+    }
+    return !empty($val);
+}
+
+function ahmaipsu_rest_request_sent_enabled_meta() {
+    if (empty($GLOBALS['ahmaipsu_rest_request']) || !($GLOBALS['ahmaipsu_rest_request'] instanceof WP_REST_Request)) {
+        return false;
+    }
+    $meta = $GLOBALS['ahmaipsu_rest_request']->get_param('meta');
+    return is_array($meta) && array_key_exists('_ahmaipsu_enabled', $meta);
+}
+
+function ahmaipsu_post_should_autogen($post_id) {
+    $options = get_option('ahmaipsu_settings', array());
+    $global_enabled = !empty($options['ahmaipsu_global_enable']);
+    $remote_autogen = array_key_exists('ahmaipsu_remote_autogen', $options)
+        ? !empty($options['ahmaipsu_remote_autogen'])
+        : true;
+
+    if (isset($_POST['ahmaipsu_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['ahmaipsu_nonce'])), 'ahmaipsu_meta')) {
+        if (isset($_POST['ahmaipsu_enabled']) && sanitize_text_field(wp_unslash($_POST['ahmaipsu_enabled'])) == '1') {
+            update_post_meta($post_id, '_ahmaipsu_enabled', '1');
+            return true;
+        }
+        update_post_meta($post_id, '_ahmaipsu_enabled', '0');
+        return false;
+    }
+
+    $state = ahmaipsu_explicit_enabled_state($post_id);
+    if ($state === false) {
+        return false;
+    }
+    if ($state === true) {
+        return true;
+    }
+
+    if (!$global_enabled) {
+        return false;
+    }
+
+    $is_xmlrpc = defined('XMLRPC_REQUEST') && XMLRPC_REQUEST;
+    $is_rest = !empty($GLOBALS['ahmaipsu_from_rest_after_insert']);
+    $remote_without_editor_meta = false;
+    if ($is_xmlrpc) {
+        $remote_without_editor_meta = true;
+    } elseif ($is_rest && !ahmaipsu_rest_request_sent_enabled_meta()) {
+        $remote_without_editor_meta = true;
+    }
+
+    if ($remote_without_editor_meta && !$remote_autogen) {
+        return false;
+    }
+
+    update_post_meta($post_id, '_ahmaipsu_enabled', '1');
+    return true;
+}
+
 function ahmaipsu_auto_generate($post_id) {
     // Check if this is an autosave or revision
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
@@ -210,6 +304,14 @@ function ahmaipsu_auto_generate($post_id) {
     // Prevent running multiple times in the same request
     static $processed = array();
     if (isset($processed[$post_id])) return;
+
+    // REST applies plugin meta after wp_insert_post/save_post. Gutenberg is REST too:
+    // skip here and generate once from rest_after_insert so we do not double-fire.
+    $from_rest_after = !empty($GLOBALS['ahmaipsu_from_rest_after_insert']);
+    if (!$from_rest_after && defined('REST_REQUEST') && REST_REQUEST) {
+        return;
+    }
+
     $processed[$post_id] = true;
     
     // Check if this post type is supported
@@ -222,37 +324,10 @@ function ahmaipsu_auto_generate($post_id) {
     if (!in_array($post->post_type, $supported_post_types)) {
         return; // Post type not supported
     }
-    
-    // Check if summary is enabled for this specific post
-    $post_enabled = get_post_meta($post_id, '_ahmaipsu_enabled', true);
-    
-    // Special handling for new posts - check if the form data indicates it should be enabled
-    // Only check POST data if we have proper nonce verification
-    if (!$post_enabled && isset($_POST['ahmaipsu_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['ahmaipsu_nonce'])), 'ahmaipsu_meta')) {
-        if (isset($_POST['ahmaipsu_enabled']) && sanitize_text_field(wp_unslash($_POST['ahmaipsu_enabled'])) == '1') {
-            // The checkbox is checked in the form, so we should generate
-            $post_enabled = true;
-            // Also save the meta to ensure consistency (this might be why the timing is off)
-            update_post_meta($post_id, '_ahmaipsu_enabled', '1');
-        }
+
+    if (!ahmaipsu_post_should_autogen($post_id)) {
+        return;
     }
-    
-    // If still not enabled, check if this is a new post and global setting allows it
-    if (!$post_enabled) {
-        $options = get_option('ahmaipsu_settings');
-        $global_enabled = $options['ahmaipsu_global_enable'] ?? false;
-        
-        // For completely new posts (no existing _ahmaipsu_enabled meta at all), use global setting
-        $existing_meta = get_post_meta($post_id, '_ahmaipsu_enabled');
-        if (empty($existing_meta) && $global_enabled) {
-            $post_enabled = true;
-            // Save the meta for consistency
-            update_post_meta($post_id, '_ahmaipsu_enabled', '1');
-        }
-    }
-    
-    // Only generate if the post-specific toggle is enabled
-    if (!$post_enabled) return;
     
     // Check if we should regenerate or if no summary exists
     $existing_summary = get_post_meta($post_id, '_ahmaipsu_content', true);

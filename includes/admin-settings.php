@@ -311,6 +311,8 @@ function ahmaipsu_sanitize_settings($input) {
     } else {
         $sanitized['ahmaipsu_global_enable'] = 0;
     }
+
+    $sanitized['ahmaipsu_remote_autogen'] = isset($input['ahmaipsu_remote_autogen']) ? 1 : 0;
     
     // Sanitize disclaimer text
     if (isset($input['ahmaipsu_disclaimer'])) {
@@ -467,6 +469,14 @@ function ahmaipsu_settings_init() {
         'ahmaipsu_global_enable',
         __('Enable Globally', 'ahm-ai-post-summary'),
         'ahmaipsu_global_enable_render',
+        'ahmaipsu',
+        'ahmaipsu_summary_section'
+    );
+
+    add_settings_field(
+        'ahmaipsu_remote_autogen',
+        __('REST / XML-RPC', 'ahm-ai-post-summary'),
+        'ahmaipsu_remote_autogen_render',
         'ahmaipsu',
         'ahmaipsu_summary_section'
     );
@@ -661,6 +671,17 @@ function ahmaipsu_global_enable_render() {
     } else {
         echo '<p class="description">When enabled, AI summaries will be automatically generated for all new posts (individual posts can still opt out).</p>';
     }
+}
+
+function ahmaipsu_remote_autogen_render() {
+    $options = get_option('ahmaipsu_settings', array());
+    $is_enabled = array_key_exists('ahmaipsu_remote_autogen', $options)
+        ? !empty($options['ahmaipsu_remote_autogen'])
+        : true;
+    $checked = $is_enabled ? 'checked' : '';
+    echo '<input type="checkbox" name="ahmaipsu_settings[ahmaipsu_remote_autogen]" value="1" ' . esc_attr($checked) . ' id="ahmaipsu_remote_autogen" />';
+    echo '<label for="ahmaipsu_remote_autogen"> Generate for posts created via REST or XML-RPC</label>';
+    echo '<p class="description">When global auto-generation is on, posts published by APIs or agents (with no editor checkbox) still get a summary. Gutenberg already sends the editor flag; this does not double-generate those saves. Per-post off still wins if the agent sent it.</p>';
 }
 
 
@@ -935,6 +956,10 @@ function ahmaipsu_options_page() {
                     <tr>
                         <th scope="row"><?php esc_html_e('Enable Globally', 'ahm-ai-post-summary'); ?></th>
                         <td><?php ahmaipsu_global_enable_render(); ?></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('REST / XML-RPC', 'ahm-ai-post-summary'); ?></th>
+                        <td><?php ahmaipsu_remote_autogen_render(); ?></td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Supported Post Types', 'ahm-ai-post-summary'); ?></th>
